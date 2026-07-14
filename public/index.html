@@ -269,7 +269,9 @@
                 myPlayer.x += speedX; myPlayer.y += speedY;
 
                 if(myPlayer.x < 0) myPlayer.x = 0; if(myPlayer.x > ARENA_SIZE) myPlayer.x = ARENA_SIZE;
-                if(myPlayer.y < 0) myPlayer.y = 0; if(myPlayer.y > ARENA_SIZE) myPlayer.y = ARENA_SIZE;
+                if(frameCount % 4 === 0 && (speedX !== 0 || speedY !== 0)) {
+                socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body });
+                }
 
                 if(!myPlayer.body) myPlayer.body = [];
                 myPlayer.body.unshift({x: myPlayer.x, y: myPlayer.y});
