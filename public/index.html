@@ -3,38 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Snake Lite - 5v5 Tactical</title>
+    <title>Snake Lite - Premium Edition</title>
     <style>
-        body { margin: 0; padding: 0; background-color: #1a1a2e; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; touch-action: none; }
-        #gameCanvas { background-color: #1a1a2e; display: none; }
+        /* 🌌 PREMIUM BACKGROUND & UI */
+        body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; touch-action: none; }
+        #gameCanvas { background-color: #0b0c10; display: none; }
         
-        #myScoreBoard { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); z-index: 10; display: none; }
-        #roomInfo { position: absolute; top: 50px; left: 20px; color: #ffcc00; font-size: 16px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 204, 0, 0.5); z-index: 10; display: none; }
+        /* 📊 DASHBOARD ELEMENTS (Inspired by the Screenshots) */
+        #myScoreBoard { position: absolute; top: 15px; left: 20px; color: #fff; font-size: 22px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 20px; border: 2px solid #00ffcc; text-shadow: 0 0 5px #00ffcc; z-index: 10; display: none; }
+        #roomInfo { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; z-index: 10; display: none; }
         
-        #vsBoard { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 10; display: none; white-space: nowrap; }
+        #vsBoard { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: bold; background: rgba(22, 33, 62, 0.8); padding: 8px 25px; border-radius: 30px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 10; display: none; white-space: nowrap; }
         .blue-team { color: #00ccff; text-shadow: 0 0 10px #00ccff; }
         .red-team { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
-        .vs-text { color: white; margin: 0 15px; font-size: 18px; }
+        .vs-text { color: #fff; margin: 0 15px; font-size: 16px; opacity: 0.7; }
 
-        #leaderboard { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 10px; width: 150px; color: white; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); z-index: 10; display: none; }
-        #leaderboard h3 { margin: 0 0 5px 0; font-size: 16px; color: #fff; text-align: center; }
-        .leader-entry { font-size: 12px; margin: 5px 0; display: flex; justify-content: space-between; }
+        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(11, 12, 16, 0.8); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 10px; width: 160px; color: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); z-index: 10; display: none; }
+        #leaderboard h3 { margin: 0 0 8px 0; font-size: 14px; color: #ffcc00; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .leader-entry { font-size: 13px; margin: 6px 0; display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        #startMenu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22, 33, 62, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #startMenu h1 { color: #00ffcc; font-size: 40px; margin-bottom: 5px; text-shadow: 0 0 20px #00ffcc; text-transform: uppercase; text-align: center; }
-        #startMenu h2 { color: #ff3366; font-size: 20px; margin-top: 0; margin-bottom: 30px; text-shadow: 0 0 20px #ff3366; }
-        .input-box { padding: 12px 20px; font-size: 16px; border-radius: 30px; border: 2px solid #fff; background: rgba(0, 0, 0, 0.5); color: white; width: 220px; text-align: center; outline: none; margin-bottom: 15px; }
-        #playBtn { padding: 15px 40px; font-size: 18px; font-weight: bold; color: #1a1a2e; background: #fff; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px #fff; transition: 0.2s; margin-top: 10px; }
-        #playBtn:hover { transform: scale(1.1); }
+        /* 🏠 START MENU (Modern Arcade Look) */
+        #startMenu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #startMenu h1 { color: #00ffcc; font-size: 55px; margin-bottom: 0; text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; text-transform: uppercase; letter-spacing: 3px; font-style: italic; }
+        #startMenu h2 { color: #ff3366; font-size: 22px; margin-top: 5px; margin-bottom: 40px; text-shadow: 0 0 15px #ff3366; letter-spacing: 2px; }
+        .input-box { padding: 15px 25px; font-size: 18px; border-radius: 30px; border: 2px solid rgba(0, 255, 204, 0.5); background: rgba(0, 0, 0, 0.5); color: #00ffcc; width: 250px; text-align: center; outline: none; margin-bottom: 20px; transition: 0.3s; }
+        .input-box:focus { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
+        .input-box::placeholder { color: rgba(0, 255, 204, 0.3); }
+        #playBtn { padding: 15px 50px; font-size: 22px; font-weight: bold; color: #0b0c10; background: linear-gradient(90deg, #00ffcc, #00ccff); border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 25px rgba(0, 255, 204, 0.6); transition: 0.2s; text-transform: uppercase; }
+        #playBtn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 204, 0.9); }
 
-        /* 📱 MOBILE CONTROLS (Joystick & Boost) */
+        /* 🕹️ MOBILE CONTROLS (Exactly like Screenshots) */
         #mobileControls { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20; }
         
-        #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; pointer-events: auto; }
-        #joystickStick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(0, 255, 204, 0.6); border-radius: 50%; box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); pointer-events: none; transition: 0.05s ease-out; }
+        /* Left Joystick */
+        #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 140px; height: 140px; background: rgba(255, 255, 255, 0.05); border: 3px solid rgba(255, 255, 255, 0.15); border-radius: 50%; pointer-events: auto; backdrop-filter: blur(5px); }
+        #joystickStick { position: absolute; top: 40px; left: 40px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(0, 255, 204, 0.9) 0%, rgba(0, 200, 150, 0.7) 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(0, 255, 204, 0.6); pointer-events: none; transition: transform 0.05s linear; }
 
-        #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 90px; height: 90px; background: rgba(255, 51, 102, 0.3); border: 3px solid rgba(255, 51, 102, 0.8); border-radius: 50%; color: white; font-weight: bold; font-size: 16px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(255, 51, 102, 0.5); user-select: none; }
-        #boostBtnMobile:active { background: rgba(255, 51, 102, 0.8); transform: scale(0.95); }
+        /* Right Boost Button */
+        #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255, 51, 102, 0.8) 0%, rgba(200, 0, 80, 0.6) 100%); border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; font-weight: bold; font-size: 35px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 51, 102, 0.6); user-select: none; backdrop-filter: blur(5px); }
+        #boostBtnMobile:active { transform: scale(0.9); box-shadow: 0 0 10px rgba(255, 51, 102, 0.4); }
 
     </style>
 </head>
@@ -42,29 +49,29 @@
 
     <div id="startMenu">
         <h1>Snake Lite</h1>
-        <h2>MOBILE SQUADS</h2>
-        <input type="text" id="playerNameInput" class="input-box" placeholder="Your Name" maxlength="12">
+        <h2>Premium Universe</h2>
+        <input type="text" id="playerNameInput" class="input-box" placeholder="Enter Your Name" maxlength="12">
         <input type="text" id="roomCodeInput" class="input-box" placeholder="Squad Code (Optional)" maxlength="10">
-        <button id="playBtn" onclick="startGame()">FIGHT NOW</button>
+        <button id="playBtn" onclick="startGame()">ENTER ARENA</button>
     </div>
 
     <div id="myScoreBoard">Score: <span id="myScore">0</span></div>
-    <div id="roomInfo">Room: <span id="currentRoomText"></span></div>
+    <div id="roomInfo">Server: <span id="currentRoomText"></span></div>
     
     <div id="vsBoard">
         <span class="blue-team"><span id="blueScore">0</span></span>
-        <span class="vs-text">⚔️</span>
+        <span class="vs-text">VS</span>
         <span class="red-team"><span id="redScore">0</span></span>
     </div>
 
     <div id="leaderboard">
-        <h3>🏆 Top Players</h3>
+        <h3>🏆 Top Snakes</h3>
         <div id="lb-list"></div>
     </div>
 
     <div id="mobileControls">
         <div id="joystickBase"><div id="joystickStick"></div></div>
-        <div id="boostBtnMobile">⚡ BOOST</div>
+        <div id="boostBtnMobile">⚡</div>
     </div>
 
     <canvas id="gameCanvas"></canvas>
@@ -86,6 +93,29 @@
         let gameActive = false; let isDead = false; 
         let isBoosting = false; let frameCount = 0;
 
+        // 🎵 SOUND ENGINE (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playTone(freq, type, duration, vol=0.1) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            let osc = audioCtx.createOscillator();
+            let gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Sound Triggers
+        function playEatSound() { playTone(600, 'sine', 0.1, 0.05); } // Halka Pop
+        function playLootEatSound() { playTone(900, 'triangle', 0.15, 0.1); } // Bada Pop
+        function playDeathSound() { playTone(100, 'sawtooth', 0.8, 0.2); } // Boom
+
+        // PC Controls
         window.addEventListener("mousemove", (e) => { 
             if (window.matchMedia("(pointer: fine)").matches) {
                 inputDx = e.clientX - (canvas.width / 2); inputDy = e.clientY - (canvas.height / 2);
@@ -94,10 +124,10 @@
         window.addEventListener("mousedown", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = true; });
         window.addEventListener("mouseup", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = false; });
 
+        // Mobile Controls
         const joystickBase = document.getElementById('joystickBase');
         const joystickStick = document.getElementById('joystickStick');
         const boostBtnMobile = document.getElementById('boostBtnMobile');
-
         let joyCenterX = 0; let joyCenterY = 0;
         
         joystickBase.addEventListener('touchstart', (e) => {
@@ -112,7 +142,7 @@
 
         function moveJoystick(touch) {
             let dx = touch.clientX - joyCenterX; let dy = touch.clientY - joyCenterY;
-            let distance = Math.hypot(dx, dy); let maxDist = 35; 
+            let distance = Math.hypot(dx, dy); let maxDist = 40; 
             if(distance > maxDist) { dx = (dx / distance) * maxDist; dy = (dy / distance) * maxDist; }
             joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
             inputDx = dx; inputDy = dy;
@@ -139,22 +169,30 @@
             if(players[myId]) document.getElementById("myScore").innerText = players[myId].score;
         }
 
+        // Radar Design Match Reference
         function drawRadar() {
-            const radarSize = 120; const margin = 15;
-            const rx = canvas.width - radarSize - margin; const ry = margin; 
+            const radarSize = 130; const margin = 20;
+            const rx = canvas.width - radarSize - margin; 
+            const ry = canvas.height - radarSize - margin; // Placed at Bottom Right like classic games
             const scale = radarSize / ARENA_SIZE;
 
-            ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; ctx.fillRect(rx, ry, radarSize, radarSize);
-            ctx.strokeStyle = "rgba(255,255,255,0.3)"; ctx.strokeRect(rx, ry, radarSize, radarSize);
+            // Radar background
+            ctx.fillStyle = "rgba(11, 12, 16, 0.7)"; 
+            ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 15); ctx.fill();
+            ctx.strokeStyle = "rgba(0, 255, 204, 0.3)"; ctx.lineWidth = 2;
+            ctx.stroke();
 
             Object.values(players).forEach(p => {
                 ctx.fillStyle = p.color; ctx.beginPath();
-                let dotSize = (p.id === myId) ? 4 : 2; 
+                let dotSize = (p.id === myId) ? 5 : 2.5; 
                 ctx.arc(rx + (p.x * scale), ry + (p.y * scale), dotSize, 0, Math.PI*2); ctx.fill();
             });
         }
 
         function startGame() {
+            // Audio context start rule (Browsers block sound until user clicks)
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+
             let nameInput = document.getElementById("playerNameInput").value.trim() || "Player";
             let roomInput = document.getElementById("roomCodeInput").value.trim(); 
 
@@ -164,10 +202,13 @@
             document.getElementById("vsBoard").style.display = "block"; 
             canvas.style.display = "block";
             
+            // Check for mobile controls
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 document.getElementById("mobileControls").style.display = "block";
                 document.getElementById("leaderboard").style.display = "none"; 
-            } else { document.getElementById("leaderboard").style.display = "block"; }
+            } else { 
+                document.getElementById("leaderboard").style.display = "block"; 
+            }
 
             gameActive = true; isDead = false;
 
@@ -178,10 +219,26 @@
             socket.on('updateLeaderboard', (serverPlayers) => { players = serverPlayers; updateUI(); });
             socket.on('foodUpdate', (foods) => { serverFoods = foods; });
             socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
-            socket.on('respawn', (resetData) => { players[myId].x = resetData.x; players[myId].y = resetData.y; players[myId].score = resetData.score; players[myId].body = resetData.body; isDead = false; });
+            
+            // Death & Respawn
+            socket.on('respawn', (resetData) => { 
+                players[myId].x = resetData.x; players[myId].y = resetData.y; 
+                players[myId].score = resetData.score; players[myId].body = resetData.body; 
+                isDead = false; 
+            });
             socket.on('playerDisconnected', (id) => { delete players[id]; updateUI(); });
 
             gameLoop();
+        }
+
+        // Draw Hexagonal/Dot Grid for Premium Look
+        function drawPremiumGrid() {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+            for(let i = 0; i < ARENA_SIZE; i += 60) {
+                for(let j = 0; j < ARENA_SIZE; j += 60) {
+                    ctx.beginPath(); ctx.arc(i, j, 2, 0, Math.PI*2); ctx.fill();
+                }
+            }
         }
 
         function gameLoop() {
@@ -197,17 +254,19 @@
 
             ctx.save(); ctx.translate(camX, camY); 
 
-            ctx.fillStyle = "#16213e"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"; ctx.lineWidth = 2;
-            for(let i = 0; i < ARENA_SIZE; i += 100) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, ARENA_SIZE); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(ARENA_SIZE, i); ctx.stroke();
-            }
-            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 10; ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE);
+            // Dark Arena with Premium Dot Grid
+            ctx.fillStyle = "#0b0c10"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
+            drawPremiumGrid();
+            
+            // Glowing Borders
+            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 15; 
+            ctx.shadowBlur = 20; ctx.shadowColor = myPlayer.color;
+            ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE);
+            ctx.shadowBlur = 0; // reset
 
             if (!isDead) {
                 let angle = Math.atan2(inputDy, inputDx);
-                let speed = (isBoosting && myPlayer.score > 15) ? 10 : 5;
+                let speed = (isBoosting && myPlayer.score > 15) ? 11 : 5.5; // Thodi speed badhayi
                 let speedX = 0, speedY = 0;
                 
                 if (Math.hypot(inputDx, inputDy) > 5) { speedX = Math.cos(angle) * speed; speedY = Math.sin(angle) * speed; }
@@ -222,7 +281,7 @@
                 let targetLength = 15 + Math.floor(myPlayer.score / 10);
                 while(myPlayer.body.length > targetLength) myPlayer.body.pop();
 
-                // 🚀 LAG FIX: Data Throttling
+                // Lag Fix: Data Throttling
                 if(frameCount % 4 === 0 && (speedX !== 0 || speedY !== 0)) {
                     socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body });
                 }
@@ -236,19 +295,25 @@
                     if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { 
                         enemy.body.forEach(seg => {
                             if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) {
-                                isDead = true; socket.emit('playerDied');
+                                isDead = true; 
+                                playDeathSound(); // 🎵 Sound on death
+                                socket.emit('playerDied');
                             }
                         });
                     }
                 });
 
-                // 🚀 LAG FIX: Optimistic Food Update
+                // Lag Fix: Optimistic Food Update
                 if(!isDead) {
                     for(let i = 0; i < serverFoods.length; i++) {
                         let f = serverFoods[i];
                         if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
                             myPlayer.score += (f.value || 10);
                             document.getElementById("myScore").innerText = myPlayer.score;
+                            
+                            // 🎵 Eat Sound
+                            if(f.value > 10) playLootEatSound(); else playEatSound();
+
                             socket.emit('eatFood', f.id); 
                             serverFoods.splice(i, 1); 
                             break;
@@ -257,24 +322,41 @@
                 }
             }
 
+            // Draw Premium Foods (Glowing Orbs)
             serverFoods.forEach(f => {
-                ctx.fillStyle = f.color; ctx.shadowBlur = 15; ctx.shadowColor = f.color;
+                ctx.fillStyle = f.color; ctx.shadowBlur = 25; ctx.shadowColor = f.color;
                 ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
             });
 
+            // Draw Premium Snakes
             Object.values(players).forEach(p => {
-                ctx.fillStyle = p.color; ctx.shadowBlur = 15; ctx.shadowColor = p.color;
+                ctx.shadowBlur = 10; ctx.shadowColor = p.color;
+                
+                // Draw Body
                 if(p.body && p.body.length > 0) {
-                    p.body.forEach((seg, i) => {
+                    for(let i = p.body.length - 1; i >= 0; i--) {
+                        let seg = p.body[i];
+                        ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color; // Stripe effect
                         ctx.beginPath();
                         let s = p.size - (i * (p.size / p.body.length) * 0.4); 
                         ctx.arc(seg.x, seg.y, s / 2, 0, Math.PI * 2); ctx.fill();
-                    });
-                } else {
-                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2); ctx.fill();
+                    }
                 }
-                ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
-                ctx.fillText(p.name, p.x, p.y - 25);
+                
+                // Draw Head
+                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size / 2 + 2, 0, Math.PI * 2); ctx.fill();
+                
+                // Eyes for Head
+                ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.arc(p.x - 5, p.y - 5, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x + 5, p.y - 5, 4, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = "#000";
+                ctx.beginPath(); ctx.arc(p.x - 5, p.y - 6, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(p.x + 5, p.y - 6, 2, 0, Math.PI * 2); ctx.fill();
+
+                // Name Tag
+                ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center"; 
+                ctx.fillText(p.name, p.x, p.y - 30);
             });
 
             ctx.restore(); 
