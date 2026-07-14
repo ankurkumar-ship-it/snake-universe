@@ -296,17 +296,22 @@
                     }
                 });
 
+                // Khana check (Agar zinda ho tabhi khao)
                 if(!isDead) {
                     for(let i = 0; i < serverFoods.length; i++) {
                         let f = serverFoods[i];
                         if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
-                            socket.emit('eatFood', f.id); 
-                            serverFoods.splice(i, 1); 
+                            
+                            // ⚡ OPTIMISTIC UPDATE: Khate hi turant locally score badha do (No Lag feel)
+                            myPlayer.score += (f.value || 10);
+                            document.getElementById("myScore").innerText = myPlayer.score;
+                            
+                            socket.emit('eatFood', f.id); // Server ko bata do
+                            serverFoods.splice(i, 1); // Screen se turant hata do
                             break;
                         }
                     }
                 }
-            }
 
             // Draw Elements
             serverFoods.forEach(f => {
