@@ -1,0 +1,20 @@
+{
+  "background_color": "#0b0c10",
+  "dir": "ltr",
+  "display": "fullscreen",
+  "name": "Snake Lite - Premium",
+  "orientation": "landscape",
+  "scope": "/",
+  "short_name": "Snake Lite",
+  "start_url": "/",
+  "theme_color": "#0b0c10",
+  "description": "An epic 5v5 tactical multiplayer snake battle arena.",
+  "lang": "en",
+  "display_override": [
+    "window-controls-overlay",
+    "fullscreen"
+  ],
+  "categories": [
+    "games"
+  ]
+}
