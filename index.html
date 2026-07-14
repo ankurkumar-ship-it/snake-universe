@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Lite - 5v5 Tactical</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #1a1a2e; overflow: hidden; font-family: 'Segoe UI', sans-serif; user-select: none; touch-action: none; }
+        #gameCanvas { background-color: #1a1a2e; display: none; }
+        
+        #myScoreBoard { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); z-index: 10; display: none; }
+        #roomInfo { position: absolute; top: 50px; left: 20px; color: #ffcc00; font-size: 16px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 204, 0, 0.5); z-index: 10; display: none; }
+        
+        #vsBoard { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 24px; font-weight: bold; background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 30px; box-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 10; display: none; white-space: nowrap; }
+        .blue-team { color: #00ccff; text-shadow: 0 0 10px #00ccff; }
+        .red-team { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
+        .vs-text { color: white; margin: 0 15px; font-size: 18px; }
+
+        #leaderboard { position: absolute; top: 20px; right: 20px; background: rgba(0, 0, 0, 0.5); border-radius: 10px; padding: 10px; width: 150px; color: white; box-shadow: 0 0 15px rgba(0, 0, 0, 0.5); z-index: 10; display: none; }
+        #leaderboard h3 { margin: 0 0 5px 0; font-size: 16px; color: #fff; text-align: center; }
+        .leader-entry { font-size: 12px; margin: 5px 0; display: flex; justify-content: space-between; }
+        
+        #startMenu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(22, 33, 62, 0.95); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #startMenu h1 { color: #00ffcc; font-size: 40px; margin-bottom: 5px; text-shadow: 0 0 20px #00ffcc; text-transform: uppercase; text-align: center; }
+        #startMenu h2 { color: #ff3366; font-size: 20px; margin-top: 0; margin-bottom: 30px; text-shadow: 0 0 20px #ff3366; }
+        .input-box { padding: 12px 20px; font-size: 16px; border-radius: 30px; border: 2px solid #fff; background: rgba(0, 0, 0, 0.5); color: white; width: 220px; text-align: center; outline: none; margin-bottom: 15px; }
+        #playBtn { padding: 15px 40px; font-size: 18px; font-weight: bold; color: #1a1a2e; background: #fff; border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 20px #fff; transition: 0.2s; margin-top: 10px; }
+        #playBtn:hover { transform: scale(1.1); }
+
+        /* 📱 MOBILE CONTROLS (Joystick & Boost) */
+        #mobileControls { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20; }
+        
+        /* Joystick Base & Stick */
+        #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 120px; height: 120px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.3); border-radius: 50%; pointer-events: auto; }
+        #joystickStick { position: absolute; top: 35px; left: 35px; width: 50px; height: 50px; background: rgba(0, 255, 204, 0.6); border-radius: 50%; box-shadow: 0 0 15px rgba(0, 255, 204, 0.8); pointer-events: none; transition: 0.05s ease-out; }
+
+        /* Boost Button */
+        #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 90px; height: 90px; background: rgba(255, 51, 102, 0.3); border: 3px solid rgba(255, 51, 102, 0.8); border-radius: 50%; color: white; font-weight: bold; font-size: 16px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(255, 51, 102, 0.5); user-select: none; }
+        #boostBtnMobile:active { background: rgba(255, 51, 102, 0.8); transform: scale(0.95); }
+
+    </style>
+</head>
+<body>
+
+    <div id="startMenu">
+        <h1>Snake Lite</h1>
+        <h2>MOBILE SQUADS</h2>
+        <input type="text" id="playerNameInput" class="input-box" placeholder="Your Name" maxlength="12">
+        <input type="text" id="roomCodeInput" class="input-box" placeholder="Squad Code (Optional)" maxlength="10">
+        <button id="playBtn" onclick="startGame()">FIGHT NOW</button>
+    </div>
+
+    <div id="myScoreBoard">Score: <span id="myScore">0</span></div>
+    <div id="roomInfo">Room: <span id="currentRoomText"></span></div>
+    
+    <div id="vsBoard">
+        <span class="blue-team"><span id="blueScore">0</span></span>
+        <span class="vs-text">⚔️</span>
+        <span class="red-team"><span id="redScore">0</span></span>
+    </div>
+
+    <div id="leaderboard">
+        <h3>🏆 Top Players</h3>
+        <div id="lb-list"></div>
+    </div>
+
+    <div id="mobileControls">
+        <div id="joystickBase">
+            <div id="joystickStick"></div>
+        </div>
+        <div id="boostBtnMobile">⚡ BOOST</div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const ARENA_SIZE = 3000; 
+        let socket; 
+        let myId = null; 
+        let players = {}; 
+        let serverFoods = [];
+        
+        // Direction Controls
+        let inputDx = 0;
+        let inputDy = 0;
+        
+        let gameActive = false;
+        let isDead = false; 
+        let isBoosting = false;
+        let frameCount = 0;
+
+        // --- PC MOUSE CONTROLS ---
+        window.addEventListener("mousemove", (e) => { 
+            // Agar touch screen nahi hai tabhi mouse chalega
+            if (window.matchMedia("(pointer: fine)").matches) {
+                inputDx = e.clientX - (canvas.width / 2); 
+                inputDy = e.clientY - (canvas.height / 2);
+            }
+        });
+        window.addEventListener("mousedown", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = true; });
+        window.addEventListener("mouseup", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = false; });
+
+        // --- MOBILE JOYSTICK LOGIC ---
+        const joystickBase = document.getElementById('joystickBase');
+        const joystickStick = document.getElementById('joystickStick');
+        const boostBtnMobile = document.getElementById('boostBtnMobile');
+
+        let joyCenterX = 0; let joyCenterY = 0;
+        
+        joystickBase.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            let rect = joystickBase.getBoundingClientRect();
+            joyCenterX = rect.left + rect.width / 2;
+            joyCenterY = rect.top + rect.height / 2;
+            moveJoystick(e.touches[0]);
+        }, {passive: false});
+
+        joystickBase.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            moveJoystick(e.touches[0]);
+        }, {passive: false});
+
+        joystickBase.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            joystickStick.style.transform = `translate(0px, 0px)`; // Wapas center
+        }, {passive: false});
+
+        function moveJoystick(touch) {
+            let dx = touch.clientX - joyCenterX;
+            let dy = touch.clientY - joyCenterY;
+            
+            // Limit joystick movement inside the circle
+            let distance = Math.hypot(dx, dy);
+            let maxDist = 35; // Maximum stick duri
+            if(distance > maxDist) {
+                dx = (dx / distance) * maxDist;
+                dy = (dy / distance) * maxDist;
+            }
+            
+            joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
+            
+            // Pass value to game engine
+            inputDx = dx;
+            inputDy = dy;
+        }
+
+        // Mobile Boost Button Logic
+        boostBtnMobile.addEventListener('touchstart', (e) => { e.preventDefault(); isBoosting = true; }, {passive: false});
+        boostBtnMobile.addEventListener('touchend', (e) => { e.preventDefault(); isBoosting = false; }, {passive: false});
+
+
+        function updateUI() {
+            let allPlayers = Object.values(players);
+            let tBlue = 0; let tRed = 0;
+            allPlayers.forEach(p => { if(p.team === 'Blue') tBlue += p.score; else tRed += p.score; });
+            document.getElementById("blueScore").innerText = tBlue;
+            document.getElementById("redScore").innerText = tRed;
+
+            allPlayers.sort((a, b) => b.score - a.score);
+            let lbHTML = "";
+            for(let i=0; i<Math.min(5, allPlayers.length); i++) {
+                let p = allPlayers[i];
+                let fontStyle = (p.id === myId) ? "font-weight:bold; text-decoration:underline;" : "";
+                lbHTML += `<div class="leader-entry" style="color: ${p.color}; ${fontStyle}"><span>#${i+1} ${p.name}</span><span>${p.score}</span></div>`;
+            }
+            document.getElementById("lb-list").innerHTML = lbHTML;
+            if(players[myId]) document.getElementById("myScore").innerText = players[myId].score;
+        }
+
+        function drawRadar() {
+            const radarSize = 120;
+            const margin = 15;
+            const rx = canvas.width - radarSize - margin;
+            const ry = margin; // Ab radar upar right mein hai leaderboard ke paas
+            const scale = radarSize / ARENA_SIZE;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+            ctx.fillRect(rx, ry, radarSize, radarSize);
+            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+            ctx.strokeRect(rx, ry, radarSize, radarSize);
+
+            Object.values(players).forEach(p => {
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                let dotSize = (p.id === myId) ? 4 : 2; 
+                ctx.arc(rx + (p.x * scale), ry + (p.y * scale), dotSize, 0, Math.PI*2);
+                ctx.fill();
+            });
+        }
+
+        function startGame() {
+            let nameInput = document.getElementById("playerNameInput").value.trim() || "Player";
+            let roomInput = document.getElementById("roomCodeInput").value.trim(); 
+
+            document.getElementById("startMenu").style.display = "none";
+            document.getElementById("myScoreBoard").style.display = "block";
+            document.getElementById("roomInfo").style.display = "block";
+            document.getElementById("vsBoard").style.display = "block"; 
+            canvas.style.display = "block";
+            
+            // Check if device is touch screen
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                document.getElementById("mobileControls").style.display = "block";
+                // Leaderboard chhupayenge mobile par taaki screen saaf rahe
+                document.getElementById("leaderboard").style.display = "none"; 
+            } else {
+                document.getElementById("leaderboard").style.display = "block";
+            }
+
+            gameActive = true;
+            isDead = false;
+
+            socket = io();
+            socket.on('connect', () => { myId = socket.id; socket.emit('joinRoom', { name: nameInput, roomCode: roomInput }); });
+            socket.on('gameData', (data) => { players = data.players; serverFoods = data.foods; document.getElementById("currentRoomText").innerText = data.roomCode; updateUI(); });
+            socket.on('newPlayer', (pInfo) => { players[pInfo.id] = pInfo; updateUI(); });
+            socket.on('updateLeaderboard', (serverPlayers) => { players = serverPlayers; updateUI(); });
+            socket.on('foodUpdate', (foods) => { serverFoods = foods; });
+            socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
+            socket.on('respawn', (resetData) => { players[myId].x = resetData.x; players[myId].y = resetData.y; players[myId].score = resetData.score; players[myId].body = resetData.body; isDead = false; });
+            socket.on('playerDisconnected', (id) => { delete players[id]; updateUI(); });
+
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (!gameActive || !players[myId]) {
+                if(gameActive) requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            frameCount++;
+            let myPlayer = players[myId];
+            
+            let camX = canvas.width / 2 - myPlayer.x;
+            let camY = canvas.height / 2 - myPlayer.y;
+
+            ctx.save();
+            ctx.translate(camX, camY); 
+
+            // Arena Background
+            ctx.fillStyle = "#16213e"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.05)"; ctx.lineWidth = 2;
+            for(let i = 0; i < ARENA_SIZE; i += 100) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, ARENA_SIZE); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(ARENA_SIZE, i); ctx.stroke();
+            }
+            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 10; ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE);
+
+            if (!isDead) {
+                // Movement depends on inputDx and inputDy (Joystick or Mouse)
+                let angle = Math.atan2(inputDy, inputDx);
+                let speed = (isBoosting && myPlayer.score > 15) ? 10 : 5;
+                let speedX = 0, speedY = 0;
+                
+                // Agar input aa raha hai toh chalo
+                if (Math.hypot(inputDx, inputDy) > 5) { 
+                    speedX = Math.cos(angle) * speed; 
+                    speedY = Math.sin(angle) * speed; 
+                }
+
+                myPlayer.x += speedX; myPlayer.y += speedY;
+
+                if(myPlayer.x < 0) myPlayer.x = 0; if(myPlayer.x > ARENA_SIZE) myPlayer.x = ARENA_SIZE;
+                if(myPlayer.y < 0) myPlayer.y = 0; if(myPlayer.y > ARENA_SIZE) myPlayer.y = ARENA_SIZE;
+
+                if(!myPlayer.body) myPlayer.body = [];
+                myPlayer.body.unshift({x: myPlayer.x, y: myPlayer.y});
+                
+                let targetLength = 15 + Math.floor(myPlayer.score / 10);
+                while(myPlayer.body.length > targetLength) myPlayer.body.pop();
+
+                if(speedX !== 0 || speedY !== 0) socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body });
+
+                if(isBoosting && myPlayer.score > 15 && frameCount % 6 === 0) {
+                    let tailPos = myPlayer.body[myPlayer.body.length - 1] || {x: myPlayer.x, y: myPlayer.y};
+                    socket.emit('dropMass', tailPos);
+                }
+
+                Object.values(players).forEach(enemy => {
+                    if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { 
+                        enemy.body.forEach(seg => {
+                            if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) {
+                                isDead = true; socket.emit('playerDied');
+                            }
+                        });
+                    }
+                });
+
+                if(!isDead) {
+                    for(let i = 0; i < serverFoods.length; i++) {
+                        let f = serverFoods[i];
+                        if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
+                            socket.emit('eatFood', f.id); 
+                            serverFoods.splice(i, 1); 
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // Draw Elements
+            serverFoods.forEach(f => {
+                ctx.fillStyle = f.color; ctx.shadowBlur = 15; ctx.shadowColor = f.color;
+                ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
+            });
+
+            Object.values(players).forEach(p => {
+                ctx.fillStyle = p.color; ctx.shadowBlur = 15; ctx.shadowColor = p.color;
+                if(p.body && p.body.length > 0) {
+                    p.body.forEach((seg, i) => {
+                        ctx.beginPath();
+                        let s = p.size - (i * (p.size / p.body.length) * 0.4); 
+                        ctx.arc(seg.x, seg.y, s / 2, 0, Math.PI * 2); ctx.fill();
+                    });
+                } else {
+                    ctx.beginPath(); ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2); ctx.fill();
+                }
+                
+                ctx.fillStyle = "white"; ctx.font = "bold 14px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
+                ctx.fillText(p.name, p.x, p.y - 25);
+            });
+
+            ctx.restore(); 
+            
+            // Draw Minimap
+            drawRadar();
+
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
