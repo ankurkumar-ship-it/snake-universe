@@ -6,10 +6,9 @@
     <title>Snake Lite - Premium Edition</title>
     <style>
         /* 🌌 PREMIUM BACKGROUND & UI */
-        body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; touch-action: none; }
+        body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; touch-action: none; }
         #gameCanvas { background-color: #0b0c10; display: none; }
         
-        /* 📊 DASHBOARD ELEMENTS (Inspired by the Screenshots) */
         #myScoreBoard { position: absolute; top: 15px; left: 20px; color: #fff; font-size: 22px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 20px; border: 2px solid #00ffcc; text-shadow: 0 0 5px #00ffcc; z-index: 10; display: none; }
         #roomInfo { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; z-index: 10; display: none; }
         
@@ -22,26 +21,19 @@
         #leaderboard h3 { margin: 0 0 8px 0; font-size: 14px; color: #ffcc00; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
         .leader-entry { font-size: 13px; margin: 6px 0; display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* 🏠 START MENU (Modern Arcade Look) */
         #startMenu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #startMenu h1 { color: #00ffcc; font-size: 55px; margin-bottom: 0; text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; text-transform: uppercase; letter-spacing: 3px; font-style: italic; }
+        #startMenu h1 { color: #00ffcc; font-size: 55px; margin-bottom: 0; text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; text-transform: uppercase; font-style: italic; }
         #startMenu h2 { color: #ff3366; font-size: 22px; margin-top: 5px; margin-bottom: 40px; text-shadow: 0 0 15px #ff3366; letter-spacing: 2px; }
         .input-box { padding: 15px 25px; font-size: 18px; border-radius: 30px; border: 2px solid rgba(0, 255, 204, 0.5); background: rgba(0, 0, 0, 0.5); color: #00ffcc; width: 250px; text-align: center; outline: none; margin-bottom: 20px; transition: 0.3s; }
         .input-box:focus { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
-        .input-box::placeholder { color: rgba(0, 255, 204, 0.3); }
         #playBtn { padding: 15px 50px; font-size: 22px; font-weight: bold; color: #0b0c10; background: linear-gradient(90deg, #00ffcc, #00ccff); border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 25px rgba(0, 255, 204, 0.6); transition: 0.2s; text-transform: uppercase; }
-        #playBtn:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(0, 255, 204, 0.9); }
+        #playBtn:hover { transform: scale(1.05); }
 
-        /* 🕹️ MOBILE CONTROLS (Exactly like Screenshots) */
         #mobileControls { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20; }
-        
-        /* Left Joystick */
         #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 140px; height: 140px; background: rgba(255, 255, 255, 0.05); border: 3px solid rgba(255, 255, 255, 0.15); border-radius: 50%; pointer-events: auto; backdrop-filter: blur(5px); }
         #joystickStick { position: absolute; top: 40px; left: 40px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(0, 255, 204, 0.9) 0%, rgba(0, 200, 150, 0.7) 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(0, 255, 204, 0.6); pointer-events: none; transition: transform 0.05s linear; }
-
-        /* Right Boost Button */
         #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255, 51, 102, 0.8) 0%, rgba(200, 0, 80, 0.6) 100%); border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; font-weight: bold; font-size: 35px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 51, 102, 0.6); user-select: none; backdrop-filter: blur(5px); }
-        #boostBtnMobile:active { transform: scale(0.9); box-shadow: 0 0 10px rgba(255, 51, 102, 0.4); }
+        #boostBtnMobile:active { transform: scale(0.9); }
 
     </style>
 </head>
@@ -93,29 +85,34 @@
         let gameActive = false; let isDead = false; 
         let isBoosting = false; let frameCount = 0;
 
-        // 🎵 SOUND ENGINE (Web Audio API)
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // 🎨 GRAPHICS ENGINE: Loading Your Images!
+        const imgSnakeHead = new Image(); imgSnakeHead.src = 'snake.png';
         
+        const imgApple = new Image(); imgApple.src = 'apple.png';
+        const imgBurger = new Image(); imgBurger.src = 'burger.png';
+        const imgCake = new Image(); imgCake.src = 'cake.png';
+        const imgCandy = new Image(); imgCandy.src = 'candy.png';
+        const imgTruffle = new Image(); imgTruffle.src = 'truffle.png';
+        
+        // Sab khane ki images ka array (taaki hum random dikha sakein)
+        const foodImages = [imgApple, imgBurger, imgCake, imgCandy, imgTruffle];
+
+        // 🎵 SOUND ENGINE
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(freq, type, duration, vol=0.1) {
             if(audioCtx.state === 'suspended') audioCtx.resume();
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
             gain.gain.setValueAtTime(vol, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + duration);
         }
+        function playEatSound() { playTone(600, 'sine', 0.1, 0.05); } 
+        function playLootEatSound() { playTone(900, 'triangle', 0.15, 0.1); } 
+        function playDeathSound() { playTone(100, 'sawtooth', 0.8, 0.2); } 
 
-        // Sound Triggers
-        function playEatSound() { playTone(600, 'sine', 0.1, 0.05); } // Halka Pop
-        function playLootEatSound() { playTone(900, 'triangle', 0.15, 0.1); } // Bada Pop
-        function playDeathSound() { playTone(100, 'sawtooth', 0.8, 0.2); } // Boom
-
-        // PC Controls
+        // Controls (PC & Mobile)
         window.addEventListener("mousemove", (e) => { 
             if (window.matchMedia("(pointer: fine)").matches) {
                 inputDx = e.clientX - (canvas.width / 2); inputDy = e.clientY - (canvas.height / 2);
@@ -124,7 +121,6 @@
         window.addEventListener("mousedown", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = true; });
         window.addEventListener("mouseup", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = false; });
 
-        // Mobile Controls
         const joystickBase = document.getElementById('joystickBase');
         const joystickStick = document.getElementById('joystickStick');
         const boostBtnMobile = document.getElementById('boostBtnMobile');
@@ -151,7 +147,6 @@
         boostBtnMobile.addEventListener('touchstart', (e) => { e.preventDefault(); isBoosting = true; }, {passive: false});
         boostBtnMobile.addEventListener('touchend', (e) => { e.preventDefault(); isBoosting = false; }, {passive: false});
 
-
         function updateUI() {
             let allPlayers = Object.values(players);
             let tBlue = 0; let tRed = 0;
@@ -169,18 +164,15 @@
             if(players[myId]) document.getElementById("myScore").innerText = players[myId].score;
         }
 
-        // Radar Design Match Reference
         function drawRadar() {
             const radarSize = 130; const margin = 20;
             const rx = canvas.width - radarSize - margin; 
-            const ry = canvas.height - radarSize - margin; // Placed at Bottom Right like classic games
+            const ry = canvas.height - radarSize - margin;
             const scale = radarSize / ARENA_SIZE;
 
-            // Radar background
             ctx.fillStyle = "rgba(11, 12, 16, 0.7)"; 
             ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 15); ctx.fill();
-            ctx.strokeStyle = "rgba(0, 255, 204, 0.3)"; ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.strokeStyle = "rgba(0, 255, 204, 0.3)"; ctx.lineWidth = 2; ctx.stroke();
 
             Object.values(players).forEach(p => {
                 ctx.fillStyle = p.color; ctx.beginPath();
@@ -189,10 +181,17 @@
             });
         }
 
-        function startGame() {
-            // Audio context start rule (Browsers block sound until user clicks)
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+        function drawPremiumGrid() {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
+            for(let i = 0; i < ARENA_SIZE; i += 60) {
+                for(let j = 0; j < ARENA_SIZE; j += 60) {
+                    ctx.beginPath(); ctx.arc(i, j, 2, 0, Math.PI*2); ctx.fill();
+                }
+            }
+        }
 
+        function startGame() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             let nameInput = document.getElementById("playerNameInput").value.trim() || "Player";
             let roomInput = document.getElementById("roomCodeInput").value.trim(); 
 
@@ -202,13 +201,10 @@
             document.getElementById("vsBoard").style.display = "block"; 
             canvas.style.display = "block";
             
-            // Check for mobile controls
             if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 document.getElementById("mobileControls").style.display = "block";
                 document.getElementById("leaderboard").style.display = "none"; 
-            } else { 
-                document.getElementById("leaderboard").style.display = "block"; 
-            }
+            } else { document.getElementById("leaderboard").style.display = "block"; }
 
             gameActive = true; isDead = false;
 
@@ -220,7 +216,6 @@
             socket.on('foodUpdate', (foods) => { serverFoods = foods; });
             socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
             
-            // Death & Respawn
             socket.on('respawn', (resetData) => { 
                 players[myId].x = resetData.x; players[myId].y = resetData.y; 
                 players[myId].score = resetData.score; players[myId].body = resetData.body; 
@@ -229,16 +224,6 @@
             socket.on('playerDisconnected', (id) => { delete players[id]; updateUI(); });
 
             gameLoop();
-        }
-
-        // Draw Hexagonal/Dot Grid for Premium Look
-        function drawPremiumGrid() {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
-            for(let i = 0; i < ARENA_SIZE; i += 60) {
-                for(let j = 0; j < ARENA_SIZE; j += 60) {
-                    ctx.beginPath(); ctx.arc(i, j, 2, 0, Math.PI*2); ctx.fill();
-                }
-            }
         }
 
         function gameLoop() {
@@ -254,19 +239,16 @@
 
             ctx.save(); ctx.translate(camX, camY); 
 
-            // Dark Arena with Premium Dot Grid
             ctx.fillStyle = "#0b0c10"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
             drawPremiumGrid();
             
-            // Glowing Borders
             ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 15; 
             ctx.shadowBlur = 20; ctx.shadowColor = myPlayer.color;
-            ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE);
-            ctx.shadowBlur = 0; // reset
+            ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE); ctx.shadowBlur = 0;
 
             if (!isDead) {
                 let angle = Math.atan2(inputDy, inputDx);
-                let speed = (isBoosting && myPlayer.score > 15) ? 11 : 5.5; // Thodi speed badhayi
+                let speed = (isBoosting && myPlayer.score > 15) ? 11 : 5.5; 
                 let speedX = 0, speedY = 0;
                 
                 if (Math.hypot(inputDx, inputDy) > 5) { speedX = Math.cos(angle) * speed; speedY = Math.sin(angle) * speed; }
@@ -281,7 +263,6 @@
                 let targetLength = 15 + Math.floor(myPlayer.score / 10);
                 while(myPlayer.body.length > targetLength) myPlayer.body.pop();
 
-                // Lag Fix: Data Throttling
                 if(frameCount % 4 === 0 && (speedX !== 0 || speedY !== 0)) {
                     socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body });
                 }
@@ -295,68 +276,87 @@
                     if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { 
                         enemy.body.forEach(seg => {
                             if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) {
-                                isDead = true; 
-                                playDeathSound(); // 🎵 Sound on death
-                                socket.emit('playerDied');
+                                isDead = true; playDeathSound(); socket.emit('playerDied');
                             }
                         });
                     }
                 });
 
-                // Lag Fix: Optimistic Food Update
                 if(!isDead) {
                     for(let i = 0; i < serverFoods.length; i++) {
                         let f = serverFoods[i];
                         if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
                             myPlayer.score += (f.value || 10);
                             document.getElementById("myScore").innerText = myPlayer.score;
-                            
-                            // 🎵 Eat Sound
                             if(f.value > 10) playLootEatSound(); else playEatSound();
-
-                            socket.emit('eatFood', f.id); 
-                            serverFoods.splice(i, 1); 
+                            socket.emit('eatFood', f.id); serverFoods.splice(i, 1); 
                             break;
                         }
                     }
                 }
             }
 
-            // Draw Premium Foods (Glowing Orbs)
+            // 🍔 DRAW FOOD IMAGES
             serverFoods.forEach(f => {
-                ctx.fillStyle = f.color; ctx.shadowBlur = 25; ctx.shadowColor = f.color;
-                ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 10; ctx.shadowColor = f.color;
+                
+                // Khane ka image chunna (ID ke hisaab se taaki sabko same dikhe)
+                let charCode = f.id.charCodeAt(0) || 0;
+                let imgToDraw = foodImages[charCode % foodImages.length]; 
+                
+                let displaySize = f.size * 2.5; // Image ko thoda bada dikhana
+                
+                if (imgToDraw.complete && imgToDraw.naturalHeight !== 0) {
+                    // Asli Image Draw Karna
+                    ctx.drawImage(imgToDraw, f.x - displaySize/2, f.y - displaySize/2, displaySize, displaySize);
+                } else {
+                    // Agar image load nahi hui toh purana circle dikhana
+                    ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
+                }
             });
 
-            // Draw Premium Snakes
+            // 🐍 DRAW PREMIUM SNAKES
             Object.values(players).forEach(p => {
                 ctx.shadowBlur = 10; ctx.shadowColor = p.color;
                 
-                // Draw Body
+                // 1. Draw Body (Striped Circles)
                 if(p.body && p.body.length > 0) {
                     for(let i = p.body.length - 1; i >= 0; i--) {
                         let seg = p.body[i];
-                        ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color; // Stripe effect
+                        ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color;
                         ctx.beginPath();
                         let s = p.size - (i * (p.size / p.body.length) * 0.4); 
                         ctx.arc(seg.x, seg.y, s / 2, 0, Math.PI * 2); ctx.fill();
                     }
                 }
                 
-                // Draw Head
-                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size / 2 + 2, 0, Math.PI * 2); ctx.fill();
+                // 2. Draw Snake Head Image
+                ctx.save();
+                ctx.translate(p.x, p.y);
                 
-                // Eyes for Head
-                ctx.fillStyle = "#fff"; ctx.shadowBlur = 0;
-                ctx.beginPath(); ctx.arc(p.x - 5, p.y - 5, 4, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(p.x + 5, p.y - 5, 4, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = "#000";
-                ctx.beginPath(); ctx.arc(p.x - 5, p.y - 6, 2, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(p.x + 5, p.y - 6, 2, 0, Math.PI * 2); ctx.fill();
+                // Snake ka munh us taraf ghumana jahan wo ja raha hai
+                let headAngle = 0;
+                if (p.body && p.body.length > 0) {
+                    headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x);
+                } else if (p.id === myId) {
+                    headAngle = Math.atan2(inputDy, inputDx);
+                }
+                
+                ctx.rotate(headAngle + Math.PI/2); // Rotate head (image adjustment)
+                
+                let hSize = p.size * 1.8; // Head size 
+                
+                if (imgSnakeHead.complete && imgSnakeHead.naturalHeight !== 0) {
+                    ctx.drawImage(imgSnakeHead, -hSize/2, -hSize/2, hSize, hSize);
+                } else {
+                    ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(0, 0, p.size/2 + 2, 0, Math.PI*2); ctx.fill();
+                }
+                
+                ctx.restore();
 
-                // Name Tag
-                ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center"; 
-                ctx.fillText(p.name, p.x, p.y - 30);
+                // 3. Name Tag
+                ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
+                ctx.fillText(p.name, p.x, p.y - 35);
             });
 
             ctx.restore(); 
