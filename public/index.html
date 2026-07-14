@@ -5,34 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snake Lite - Premium Edition</title>
     <style>
-        /* 🌌 PREMIUM BACKGROUND & UI */
+        /* 🌌 GLOBAL STYLES */
         body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; touch-action: none; }
         #gameCanvas { background-color: #0b0c10; display: none; }
         
-        #myScoreBoard { position: absolute; top: 15px; left: 20px; color: #fff; font-size: 22px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 20px; border: 2px solid #00ffcc; text-shadow: 0 0 5px #00ffcc; z-index: 10; display: none; }
+        /* 💎 PREMIUM DASHBOARD (GLASSMORPHISM) */
+        #startMenu { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: radial-gradient(circle at top right, #1f2833 0%, #0b0c10 100%); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
+        }
+        
+        /* The Glass Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            padding: 50px 40px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            animation: float 4s ease-in-out infinite;
+            width: 300px;
+        }
+
+        @keyframes float { 
+            0% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
+            100% { transform: translateY(0px); } 
+        }
+
+        .glass-panel h1 { 
+            color: #fff; font-size: 45px; margin: 0 0 5px 0; 
+            text-transform: uppercase; font-style: italic; letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
+        }
+        .glass-panel h1 span { color: #00ffcc; }
+        
+        .subtitle { 
+            color: #ff3366; font-size: 14px; margin-top: 0; margin-bottom: 35px; 
+            text-transform: uppercase; letter-spacing: 4px; font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+        }
+
+        .input-box { 
+            width: 85%; padding: 15px 20px; font-size: 16px; border-radius: 12px; 
+            border: 1px solid rgba(0, 255, 204, 0.3); background: rgba(0, 0, 0, 0.3); 
+            color: #00ffcc; text-align: center; outline: none; margin-bottom: 20px; 
+            transition: all 0.3s ease; font-weight: bold;
+        }
+        .input-box:focus { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); background: rgba(0, 0, 0, 0.6); }
+        .input-box::placeholder { color: rgba(255, 255, 255, 0.3); font-weight: normal; }
+
+        /* Naya Feature: Sound Settings */
+        .settings-row {
+            margin-bottom: 30px; color: #fff; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .settings-row input[type="checkbox"] { accent-color: #00ffcc; width: 18px; height: 18px; cursor: pointer; }
+
+        #playBtn { 
+            width: 100%; padding: 16px; font-size: 18px; font-weight: 800; color: #0b0c10; 
+            background: linear-gradient(135deg, #00ffcc, #00ccff); border: none; border-radius: 12px; 
+            cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 204, 0.4); transition: 0.3s; 
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        #playBtn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 204, 0.7); }
+
+        /* 📊 GAME UI (Scores, Radar, vsBoard) */
+        #myScoreBoard { position: absolute; top: 15px; left: 20px; color: #fff; font-size: 20px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(0,255,204,0.3); z-index: 10; display: none; backdrop-filter: blur(5px); }
         #roomInfo { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; z-index: 10; display: none; }
         
-        #vsBoard { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 20px; font-weight: bold; background: rgba(22, 33, 62, 0.8); padding: 8px 25px; border-radius: 30px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(0,0,0,0.8); z-index: 10; display: none; white-space: nowrap; }
+        #vsBoard { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; background: rgba(11, 12, 16, 0.8); padding: 8px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 10; display: none; white-space: nowrap; backdrop-filter: blur(5px); }
         .blue-team { color: #00ccff; text-shadow: 0 0 10px #00ccff; }
         .red-team { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
-        .vs-text { color: #fff; margin: 0 15px; font-size: 16px; opacity: 0.7; }
+        .vs-text { color: #fff; margin: 0 15px; font-size: 14px; opacity: 0.5; }
 
-        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(11, 12, 16, 0.8); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 10px; width: 160px; color: white; box-shadow: 0 0 20px rgba(0, 0, 0, 0.8); z-index: 10; display: none; }
-        #leaderboard h3 { margin: 0 0 8px 0; font-size: 14px; color: #ffcc00; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        .leader-entry { font-size: 13px; margin: 6px 0; display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        #leaderboard { position: absolute; top: 15px; right: 15px; background: rgba(11, 12, 16, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 10px; width: 160px; color: white; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); z-index: 10; display: none; backdrop-filter: blur(5px); }
+        #leaderboard h3 { margin: 0 0 8px 0; font-size: 13px; color: #ffcc00; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+        .leader-entry { font-size: 12px; margin: 6px 0; display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        #startMenu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1f2833 0%, #0b0c10 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
-        #startMenu h1 { color: #00ffcc; font-size: 55px; margin-bottom: 0; text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc; text-transform: uppercase; font-style: italic; }
-        #startMenu h2 { color: #ff3366; font-size: 22px; margin-top: 5px; margin-bottom: 40px; text-shadow: 0 0 15px #ff3366; letter-spacing: 2px; }
-        .input-box { padding: 15px 25px; font-size: 18px; border-radius: 30px; border: 2px solid rgba(0, 255, 204, 0.5); background: rgba(0, 0, 0, 0.5); color: #00ffcc; width: 250px; text-align: center; outline: none; margin-bottom: 20px; transition: 0.3s; }
-        .input-box:focus { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
-        #playBtn { padding: 15px 50px; font-size: 22px; font-weight: bold; color: #0b0c10; background: linear-gradient(90deg, #00ffcc, #00ccff); border: none; border-radius: 30px; cursor: pointer; box-shadow: 0 0 25px rgba(0, 255, 204, 0.6); transition: 0.2s; text-transform: uppercase; }
-        #playBtn:hover { transform: scale(1.05); }
-
+        /* 🕹️ MOBILE CONTROLS */
         #mobileControls { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20; }
-        #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 140px; height: 140px; background: rgba(255, 255, 255, 0.05); border: 3px solid rgba(255, 255, 255, 0.15); border-radius: 50%; pointer-events: auto; backdrop-filter: blur(5px); }
-        #joystickStick { position: absolute; top: 40px; left: 40px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(0, 255, 204, 0.9) 0%, rgba(0, 200, 150, 0.7) 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(0, 255, 204, 0.6); pointer-events: none; transition: transform 0.05s linear; }
-        #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 100px; height: 100px; background: radial-gradient(circle, rgba(255, 51, 102, 0.8) 0%, rgba(200, 0, 80, 0.6) 100%); border: 4px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; font-weight: bold; font-size: 35px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 51, 102, 0.6); user-select: none; backdrop-filter: blur(5px); }
+        #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 50%; pointer-events: auto; backdrop-filter: blur(5px); }
+        #joystickStick { position: absolute; top: 35px; left: 35px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(0, 255, 204, 0.9) 0%, rgba(0, 200, 150, 0.7) 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); pointer-events: none; transition: transform 0.05s linear; }
+        #boostBtnMobile { position: absolute; bottom: 50px; right: 40px; width: 90px; height: 90px; background: radial-gradient(circle, rgba(255, 51, 102, 0.8) 0%, rgba(200, 0, 80, 0.6) 100%); border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 50%; color: white; font-weight: bold; font-size: 30px; pointer-events: auto; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 51, 102, 0.4); user-select: none; backdrop-filter: blur(5px); }
         #boostBtnMobile:active { transform: scale(0.9); }
 
     </style>
@@ -40,11 +97,21 @@
 <body>
 
     <div id="startMenu">
-        <h1>Snake Lite</h1>
-        <h2>Premium Universe</h2>
-        <input type="text" id="playerNameInput" class="input-box" placeholder="Enter Your Name" maxlength="12">
-        <input type="text" id="roomCodeInput" class="input-box" placeholder="Squad Code (Optional)" maxlength="10">
-        <button id="playBtn" onclick="startGame()">ENTER ARENA</button>
+        <div class="glass-panel">
+            <h1>SNAKE <span>LITE</span></h1>
+            <p class="subtitle">E-Sports Edition</p>
+            
+            <input type="text" id="playerNameInput" class="input-box" placeholder="Your Name" maxlength="12">
+            <input type="text" id="roomCodeInput" class="input-box" placeholder="Squad Code (Optional)" maxlength="10">
+            
+            <div class="settings-row">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="soundToggle" checked> 🔊 Game Sounds
+                </label>
+            </div>
+
+            <button id="playBtn" onclick="startGame()">ENTER ARENA</button>
+        </div>
     </div>
 
     <div id="myScoreBoard">Score: <span id="myScore">0</span></div>
@@ -84,22 +151,20 @@
         let inputDx = 0; let inputDy = 0;
         let gameActive = false; let isDead = false; 
         let isBoosting = false; let frameCount = 0;
+        let soundEnabled = true; // Naya variable
 
-        // 🎨 GRAPHICS ENGINE: Loading Your Images!
         const imgSnakeHead = new Image(); imgSnakeHead.src = 'snake.png';
-        
         const imgApple = new Image(); imgApple.src = 'apple.png';
         const imgBurger = new Image(); imgBurger.src = 'burger.png';
         const imgCake = new Image(); imgCake.src = 'cake.png';
         const imgCandy = new Image(); imgCandy.src = 'candy.png';
         const imgTruffle = new Image(); imgTruffle.src = 'truffle.png';
-        
-        // Sab khane ki images ka array (taaki hum random dikha sakein)
         const foodImages = [imgApple, imgBurger, imgCake, imgCandy, imgTruffle];
 
         // 🎵 SOUND ENGINE
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(freq, type, duration, vol=0.1) {
+            if(!soundEnabled) return; // Agar mute hai toh aawaz mat nikalo
             if(audioCtx.state === 'suspended') audioCtx.resume();
             let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
@@ -112,7 +177,6 @@
         function playLootEatSound() { playTone(900, 'triangle', 0.15, 0.1); } 
         function playDeathSound() { playTone(100, 'sawtooth', 0.8, 0.2); } 
 
-        // Controls (PC & Mobile)
         window.addEventListener("mousemove", (e) => { 
             if (window.matchMedia("(pointer: fine)").matches) {
                 inputDx = e.clientX - (canvas.width / 2); inputDy = e.clientY - (canvas.height / 2);
@@ -132,7 +196,6 @@
             joyCenterX = rect.left + rect.width / 2; joyCenterY = rect.top + rect.height / 2;
             moveJoystick(e.touches[0]);
         }, {passive: false});
-
         joystickBase.addEventListener('touchmove', (e) => { e.preventDefault(); moveJoystick(e.touches[0]); }, {passive: false});
         joystickBase.addEventListener('touchend', (e) => { e.preventDefault(); joystickStick.style.transform = `translate(0px, 0px)`; }, {passive: false});
 
@@ -165,18 +228,18 @@
         }
 
         function drawRadar() {
-            const radarSize = 130; const margin = 20;
+            const radarSize = 120; const margin = 20;
             const rx = canvas.width - radarSize - margin; 
             const ry = canvas.height - radarSize - margin;
             const scale = radarSize / ARENA_SIZE;
 
-            ctx.fillStyle = "rgba(11, 12, 16, 0.7)"; 
-            ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 15); ctx.fill();
-            ctx.strokeStyle = "rgba(0, 255, 204, 0.3)"; ctx.lineWidth = 2; ctx.stroke();
+            ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; 
+            ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 12); ctx.fill();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 1; ctx.stroke();
 
             Object.values(players).forEach(p => {
                 ctx.fillStyle = p.color; ctx.beginPath();
-                let dotSize = (p.id === myId) ? 5 : 2.5; 
+                let dotSize = (p.id === myId) ? 4 : 2; 
                 ctx.arc(rx + (p.x * scale), ry + (p.y * scale), dotSize, 0, Math.PI*2); ctx.fill();
             });
         }
@@ -191,7 +254,11 @@
         }
 
         function startGame() {
-            if(audioCtx.state === 'suspended') audioCtx.resume();
+            // Check Sound Settings
+            soundEnabled = document.getElementById("soundToggle").checked;
+            
+            if(soundEnabled && audioCtx.state === 'suspended') audioCtx.resume();
+            
             let nameInput = document.getElementById("playerNameInput").value.trim() || "Player";
             let roomInput = document.getElementById("roomCodeInput").value.trim(); 
 
@@ -242,8 +309,8 @@
             ctx.fillStyle = "#0b0c10"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
             drawPremiumGrid();
             
-            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 15; 
-            ctx.shadowBlur = 20; ctx.shadowColor = myPlayer.color;
+            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 10; 
+            ctx.shadowBlur = 15; ctx.shadowColor = myPlayer.color;
             ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE); ctx.shadowBlur = 0;
 
             if (!isDead) {
@@ -296,30 +363,22 @@
                 }
             }
 
-            // 🍔 DRAW FOOD IMAGES
             serverFoods.forEach(f => {
-                ctx.shadowBlur = 10; ctx.shadowColor = f.color;
-                
-                // Khane ka image chunna (ID ke hisaab se taaki sabko same dikhe)
+                ctx.shadowBlur = 5; ctx.shadowColor = f.color;
                 let charCode = f.id.charCodeAt(0) || 0;
                 let imgToDraw = foodImages[charCode % foodImages.length]; 
-                
-                let displaySize = f.size * 2.5; // Image ko thoda bada dikhana
+                let displaySize = f.size * 2.5; 
                 
                 if (imgToDraw.complete && imgToDraw.naturalHeight !== 0) {
-                    // Asli Image Draw Karna
                     ctx.drawImage(imgToDraw, f.x - displaySize/2, f.y - displaySize/2, displaySize, displaySize);
                 } else {
-                    // Agar image load nahi hui toh purana circle dikhana
                     ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
                 }
             });
 
-            // 🐍 DRAW PREMIUM SNAKES
             Object.values(players).forEach(p => {
                 ctx.shadowBlur = 10; ctx.shadowColor = p.color;
                 
-                // 1. Draw Body (Striped Circles)
                 if(p.body && p.body.length > 0) {
                     for(let i = p.body.length - 1; i >= 0; i--) {
                         let seg = p.body[i];
@@ -330,33 +389,24 @@
                     }
                 }
                 
-                // 2. Draw Snake Head Image
                 ctx.save();
                 ctx.translate(p.x, p.y);
-                
-                // Snake ka munh us taraf ghumana jahan wo ja raha hai
                 let headAngle = 0;
-                if (p.body && p.body.length > 0) {
-                    headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x);
-                } else if (p.id === myId) {
-                    headAngle = Math.atan2(inputDy, inputDx);
-                }
+                if (p.body && p.body.length > 0) { headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x); } 
+                else if (p.id === myId) { headAngle = Math.atan2(inputDy, inputDx); }
                 
-                ctx.rotate(headAngle + Math.PI/2); // Rotate head (image adjustment)
-                
-                let hSize = p.size * 1.8; // Head size 
+                ctx.rotate(headAngle + Math.PI/2); 
+                let hSize = p.size * 1.8; 
                 
                 if (imgSnakeHead.complete && imgSnakeHead.naturalHeight !== 0) {
                     ctx.drawImage(imgSnakeHead, -hSize/2, -hSize/2, hSize, hSize);
                 } else {
                     ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(0, 0, p.size/2 + 2, 0, Math.PI*2); ctx.fill();
                 }
-                
                 ctx.restore();
 
-                // 3. Name Tag
-                ctx.fillStyle = "white"; ctx.font = "bold 15px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
-                ctx.fillText(p.name, p.x, p.y - 35);
+                ctx.fillStyle = "white"; ctx.font = "bold 13px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
+                ctx.fillText(p.name, p.x, p.y - 30);
             });
 
             ctx.restore(); 
