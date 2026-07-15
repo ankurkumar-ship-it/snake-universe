@@ -1,147 +1,266 @@
-// server.js - Snake Universe (Sprint & Minimap Update)
+// ==========================================
+// server.js - Snake Lite PREMIUM SQUADS (Updated dynamic Buffet)
+// ==========================================
 const express = require('express');
 const http = require('http');
-const { Server } = require('socket.io');
+const { Server } = require("socket.io");
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
+const PORT = process.env.PORT || 3000;
 const ARENA_SIZE = 3000;
-const FOOD_COUNT = 150;
-const rooms = {}; 
 
-function initRoom(roomCode) {
-    rooms[roomCode] = { players: {}, foods: [] };
-    for(let i=0; i<FOOD_COUNT; i++) {
-        rooms[roomCode].foods.push({
-            id: Math.random().toString(36).substring(2, 9),
-            x: Math.floor(Math.random() * (ARENA_SIZE - 40)) + 20,
-            y: Math.floor(Math.random() * (ARENA_SIZE - 40)) + 20,
-            color: "#ffcc00", size: 8, value: 10 
-        });
-    }
+let players = {};
+let foods = {};
+let rooms = {}; 
+const MAX_PLAYERS_PER_TEAM = 5;
+
+// Define dynamic Food Types
+const FOOD_NORMAL = 0;
+const FOOD_MAGNET = 1;
+const FOOD_CHEM = 2;
+const FOOD_COIN = 3;
+
+// Create random room if none exists
+if(!rooms['SQUAD_AUTO']){
+    rooms['SQUAD_AUTO'] = { roomCode: 'SQUAD_AUTO', bluePlayers: 0, redPlayers: 0 };
+    spawnFoodForRoom('SQUAD_AUTO', 100); 
 }
 
 io.on('connection', (socket) => {
-    
-    socket.on('joinRoom', ({ name, roomCode }) => {
-        let room = roomCode.trim() || 'GLOBAL';
-        socket.join(room);
-        socket.roomId = room; 
+    console.log('Player Connected:', socket.id);
 
-        if(!rooms[room]) initRoom(room);
-
-        let blueCount = 0; let redCount = 0;
-        for(let id in rooms[room].players) {
-            if(rooms[room].players[id].team === 'Blue') blueCount++;
-            else redCount++;
+    socket.on('joinRoom', (data) => {
+        let name = data.name || "Player";
+        let roomCode = data.roomCode.trim() || 'SQUAD_AUTO';
+        
+        if(!rooms[roomCode]){
+            rooms[roomCode] = { roomCode: roomCode, bluePlayers: 0, redPlayers: 0 };
+            spawnFoodForRoom(roomCode, 100);
         }
         
-        let myTeam = (blueCount <= redCount) ? 'Blue' : 'Red';
-        let myColor = (myTeam === 'Blue') ? '#00ccff' : '#ff3366'; 
+        let room = rooms[roomCode];
+        let team = 'Blue';
+        let color = '#00ccff'; // Neon Blue
 
-        rooms[room].players[socket.id] = {
-            id: socket.id, name: name || "Player", team: myTeam,
-            x: Math.random() * ARENA_SIZE, y: Math.random() * ARENA_SIZE,
-            size: 25, color: myColor, score: 30, body: [] // Start score 30 taaki thoda lamba ho
+        if(room.bluePlayers >= MAX_PLAYERS_PER_TEAM && room.redPlayers >= MAX_PLAYERS_PER_TEAM){
+            socket.emit('roomFull'); return;
+        }
+
+        if(room.bluePlayers <= room.redPlayers){
+            room.bluePlayers++;
+        } else {
+            team = 'Red'; color = '#ff3366'; // Neon Red
+            room.redPlayers++;
+        }
+
+        socket.join(roomCode);
+        
+        let spawnPos = getRespawnPosition(team);
+        players[socket.id] = {
+            id: socket.id,
+            name: name,
+            x: spawnPos.x, y: spawnPos.y,
+            score: 20, size: 25,
+            color: color, team: team, roomCode: roomCode,
+            body: [{x: spawnPos.x, y: spawnPos.y}],
+            magnetTimer: 0, chemTimer: 0, speedFactor: 1 // Power-up states
         };
 
-        socket.emit('gameData', {
-            players: rooms[room].players, foods: rooms[room].foods, roomCode: room
-        });
-        socket.to(room).emit('newPlayer', rooms[room].players[socket.id]);
-        io.to(room).emit('updateLeaderboard', rooms[room].players);
+        let currentRoomFoods = Object.values(foods).filter(f => f.roomCode === roomCode);
+        let roomPlayers = Object.values(players).filter(p => p.roomCode === roomCode);
+        
+        socket.emit('gameData', { players: getSanitizedPlayers(roomCode), foods: currentRoomFoods, roomCode: roomCode });
+        socket.to(roomCode).emit('newPlayer', players[socket.id]);
     });
 
     socket.on('playerMovement', (data) => {
-        let room = socket.roomId;
-        if(room && rooms[room] && rooms[room].players[socket.id]) {
-            let p = rooms[room].players[socket.id];
-            p.x = data.x; p.y = data.y; p.body = data.body;
-            socket.to(room).emit('playerMoved', p);
+        if(players[socket.id]){
+            players[socket.id].x = data.x;
+            players[socket.id].y = data.y;
+            players[socket.id].body = data.body;
+            // Broadcast simplified movement data to save bandwidth
+            socket.to(players[socket.id].roomCode).emit('playerMoved', { id: socket.id, x: data.x, y: data.y, body: data.body });
         }
     });
 
     socket.on('eatFood', (foodId) => {
-        let room = socket.roomId;
-        if(room && rooms[room]) {
-            let fIndex = rooms[room].foods.findIndex(f => f.id === foodId);
-            if(fIndex !== -1) {
-                let eatenFood = rooms[room].foods[fIndex];
-                rooms[room].foods.splice(fIndex, 1);
-                
-                if(rooms[room].players[socket.id]) {
-                    rooms[room].players[socket.id].score += eatenFood.value; 
-                }
-                
-                if (eatenFood.value === 10) {
-                    rooms[room].foods.push({
-                        id: Math.random().toString(36).substring(2, 9),
-                        x: Math.floor(Math.random() * (ARENA_SIZE - 40)) + 20,
-                        y: Math.floor(Math.random() * (ARENA_SIZE - 40)) + 20,
-                        color: "#ffcc00", size: 8, value: 10
-                    });
-                }
-                io.to(room).emit('foodUpdate', rooms[room].foods);
-                io.to(room).emit('updateLeaderboard', rooms[room].players);
-            }
-        }
-    });
+        if(foods[foodId] && players[socket.id]){
+            let p = players[socket.id];
+            let f = foods[foodId];
+            if(f.roomCode !== p.roomCode) return; 
 
-    // 🚀 SPRINT MASS DROP LOGIC
-    socket.on('dropMass', (tailPos) => {
-        let room = socket.roomId;
-        if(room && rooms[room] && rooms[room].players[socket.id]) {
-            let p = rooms[room].players[socket.id];
-            if(p.score > 15) { // Minimum score chahiye boost ke liye
-                p.score -= 2; // Score kam karo
-                rooms[room].foods.push({
-                    id: Math.random().toString(36).substring(2, 9),
-                    x: tailPos.x, y: tailPos.y,
-                    color: p.color, size: 6, value: 5 // Chhota khana
-                });
-                io.to(room).emit('foodUpdate', rooms[room].foods);
-                io.to(room).emit('updateLeaderboard', rooms[room].players);
+            // Handle Power-up & Score Logic based on Food Type
+            switch(f.type){
+                case FOOD_MAGNET:
+                    p.magnetTimer = Date.now() + 10000; // 10 Sec Magnet
+                    p.score += 5; // Halka score
+                    break;
+                case FOOD_CHEM:
+                    p.chemTimer = Date.now() + 10000; // 10 Sec Boost
+                    p.speedFactor = 2; // Double Speed (Handled on client movement)
+                    p.score += 5; 
+                    break;
+                case FOOD_COIN:
+                    p.score += 50; // Coin gives high points! (3x or more)
+                    break;
+                default: 
+                    p.score += (f.value || 10); // Normal Food
             }
+            
+            // Limit score loss
+            if(p.score < 20) p.score = 20;
+
+            delete foods[foodId];
+            
+            io.to(p.roomCode).emit('foodUpdate', getFoodsForRoom(p.roomCode));
+            
+            spawnFood(p.roomCode, 1);
         }
     });
 
     socket.on('playerDied', () => {
-        let room = socket.roomId;
-        if(room && rooms[room] && rooms[room].players[socket.id]) {
-            let deadPlayer = rooms[room].players[socket.id];
-            if (deadPlayer.body && deadPlayer.body.length > 0) {
-                deadPlayer.body.forEach((seg, index) => {
-                    if(index % 2 === 0) { 
-                        rooms[room].foods.push({
-                            id: Math.random().toString(36).substring(2, 9),
-                            x: seg.x, y: seg.y, color: deadPlayer.color, size: 15, value: 30 
-                        });
-                    }
-                });
+        if(players[socket.id]){
+            let p = players[socket.id];
+            
+            // Respawn points
+            if(p.score > 200){
+                let deathDrop = Math.floor(p.score / 2);
+                dropFoods(p.roomCode, p.body, deathDrop, 'LOOT');
             }
-            deadPlayer.score = 30; // Respawn pe thoda base score
-            deadPlayer.body = [];
-            deadPlayer.x = Math.random() * ARENA_SIZE;
-            deadPlayer.y = Math.random() * ARENA_SIZE;
-            io.to(room).emit('foodUpdate', rooms[room].foods);
-            io.to(room).emit('updateLeaderboard', rooms[room].players);
-            socket.emit('respawn', deadPlayer);
+
+            p.score = 20; // Reset score
+            let spawnPos = getRespawnPosition(p.team);
+            p.x = spawnPos.x; p.y = spawnPos.y;
+            p.body = [{x: p.x, y: p.y}];
+            p.magnetTimer = 0; p.chemTimer = 0; p.speedFactor = 1; // Clear powerups
+
+            io.to(p.roomCode).emit('respawn', { x: p.x, y: p.y, score: p.score, body: p.body });
         }
     });
 
     socket.on('disconnect', () => {
-        let room = socket.roomId;
-        if(room && rooms[room]) {
-            delete rooms[room].players[socket.id];
-            io.to(room).emit('playerDisconnected', socket.id);
-            io.to(room).emit('updateLeaderboard', rooms[room].players);
+        console.log('Player Disconnected:', socket.id);
+        if(players[socket.id]){
+            let p = players[socket.id];
+            let roomCode = p.roomCode;
+            if(rooms[roomCode]){
+                if(p.team === 'Blue') rooms[roomCode].bluePlayers--; else rooms[roomCode].redPlayers--;
+            }
+            delete players[socket.id];
+            io.to(roomCode).emit('playerDisconnected', socket.id);
         }
     });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`🚀 Sprint & Radar Server LIVE at: http://localhost:${PORT}`));
+// ==========================================
+// 🔥 THE dynamic ENGINE (server.js interval)
+// ==========================================
+setInterval(() => {
+    // Check Room Status and Clear Powerups & Apply Magnet Pull
+    let roomsCodes = Object.keys(rooms);
+    let foodsMovedInRooms = {}; // Track which rooms need food position sync
+
+    Object.values(players).forEach(p => {
+        // Clear expired powerups
+        if(p.magnetTimer > 0 && p.magnetTimer < Date.now()){ p.magnetTimer = 0; }
+        if(p.chemTimer > 0 && p.chemTimer < Date.now()){ p.chemTimer = 0; p.speedFactor = 1; }
+
+        // Apply Magnet Attraction Logic
+        if(p.magnetTimer > Date.now()){
+            let roomCode = p.roomCode;
+            let currentRoomFoods = Object.values(foods).filter(f => f.roomCode === roomCode);
+            
+            currentRoomFoods.forEach(f => {
+                let dx = p.x - f.x;
+                let dy = p.y - f.y;
+                let dist = Math.hypot(dx, dy);
+                if(dist < 300){ // Magnet attraction radius
+                    let angle = Math.atan2(dy, dx);
+                    f.x += Math.cos(angle) * 3; // Food pull speed
+                    f.y += Math.sin(angle) * 3;
+                    foodsMovedInRooms[roomCode] = true; // Food moved, needs broadcast
+                }
+            });
+        }
+    });
+
+    // Broadcast food updates only to rooms where food moved via magnet
+    Object.keys(foodsMovedInRooms).forEach(roomCode => {
+        io.to(roomCode).emit('foodUpdate', getFoodsForRoom(roomCode));
+    });
+
+    // Respawn food in rooms if count is low
+    roomsCodes.forEach(code => {
+        let foodCount = Object.values(foods).filter(f => f.roomCode === code).length;
+        if(foodCount < 70) spawnFood(code, 30);
+    });
+
+    // Broadcast updated player states (score, timers, factor) to each room
+    roomsCodes.forEach(code => { io.to(code).emit('updateLeaderboard', getSanitizedPlayers(code)); });
+
+}, 100); // UI update interval
+
+// Helpers
+function getFoodsForRoom(code){ return Object.values(foods).filter(f => f.roomCode === code); }
+function getSanitizedPlayers(code){
+    let filtered = {};
+    Object.values(players).forEach(p => { if(p.roomCode === code) filtered[p.id] = p; });
+    return filtered;
+}
+
+function spawnFood(roomCode, count){
+    for(let i=0; i<count; i++){
+        const id = 'f_' + roomCode + '_' + Date.now() + '_' + i;
+        const color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        
+        // Randomly assign Food Type (5% Magnet, 5% Chem, 10% Coin, 80% Normal)
+        let typeRand = Math.random();
+        let type = FOOD_NORMAL;
+        if(typeRand < 0.05) type = FOOD_MAGNET;
+        else if(typeRand < 0.10) type = FOOD_CHEM;
+        else if(typeRand < 0.20) type = FOOD_COIN;
+
+        foods[id] = {
+            id, roomCode,
+            x: Math.random() * ARENA_SIZE,
+            y: Math.random() * ARENA_SIZE,
+            color, size: (type === FOOD_COIN) ? 10 : 8, // Coin a little smaller maybe
+            value: 10, type: type
+        };
+    }
+}
+
+function spawnFoodForRoom(roomCode, count){ spawnFood(roomCode, count); }
+
+function getRespawnPosition(team){
+    if(team === 'Blue'){
+        return { x: 200 + Math.random() * 500, y: 200 + Math.random() * (ARENA_SIZE - 400) };
+    } else {
+        return { x: ARENA_SIZE - 700 + Math.random() * 500, y: 200 + Math.random() * (ARENA_SIZE - 400) };
+    }
+}
+
+function dropFoods(roomCode, body, amount, type='LOOT'){
+    for(let i=0; i<amount; i += 20){
+        if(body[i]){
+            const id = 'f_' + roomCode + '_' + Date.now() + '_' + i;
+            const hsl = type === 'LOOT' ? `hsl(${60}, 100%, 70%)` : `hsl(${180}, 100%, 70%)`;
+            foods[id] = {
+                id, roomCode,
+                x: body[i].x + (Math.random() * 40 - 20),
+                y: body[i].y + (Math.random() * 40 - 20),
+                color: hsl, size: 10,
+                value: 15, type: FOOD_NORMAL
+            };
+        }
+    }
+    io.to(roomCode).emit('foodUpdate', getFoodsForRoom(roomCode));
+}
+
+server.listen(PORT, () => { console.log(`Dynamic dynamic Server is running on port ${PORT}`); });
