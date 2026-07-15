@@ -216,11 +216,11 @@
         players[myId].x = tempX;
         players[myId].y = tempY;
         players[myId].body = tempBody;
-    } else {
+        } else {
         players = serverPlayers;
-    }
-    updateUI(); 
-});
+     }
+        updateUI(); 
+     });
             socket.on('foodUpdate', (foods) => { serverFoods = foods; });
             socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
             socket.on('respawn', (resetData) => { players[myId].x = resetData.x; players[myId].y = resetData.y; players[myId].score = resetData.score; players[myId].body = resetData.body; isDead = false; });
@@ -231,7 +231,9 @@
         function gameLoop() {
             if (!gameActive || !players[myId]) { if(gameActive) requestAnimationFrame(gameLoop); return; }
             ctx.clearRect(0, 0, canvas.width, canvas.height); frameCount++; let myPlayer = players[myId];
-            let camX = canvas.width / 2 - myPlayer.x; let camY = canvas.height / 2 - myPlayer.y;
+            // Math.floor lagane se camera sub-pixel par vibrate nahi karega
+            let camX = Math.floor(canvas.width / 2 - myPlayer.x); 
+            let camY = Math.floor(canvas.height / 2 - myPlayer.y);
             ctx.save(); ctx.translate(camX, camY); 
             // Draw Arena
             ctx.fillStyle = "#0b0c10"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
