@@ -4,66 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snake Lite - Premium Edition</title>
-    <link rel="manifest" href="/manifest.json">
     <style>
-        /* 🌌 GLOBAL STYLES */
+        /* 🌌 Premium Background */
         body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; touch-action: none; }
         #gameCanvas { background-color: #0b0c10; display: none; }
         
-        /* 💎 PREMIUM DASHBOARD (GLASSMORPHISM) */
+        /* 💎 Glassmorphism Dashboard */
         #startMenu { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             background: radial-gradient(circle at top right, #1f2833 0%, #0b0c10 100%); 
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; 
         }
         
-        /* The Glass Panel */
         .glass-panel {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            padding: 50px 40px;
-            text-align: center;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-            animation: float 4s ease-in-out infinite;
-            width: 300px;
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 25px; padding: 50px 40px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); animation: float 4s ease-in-out infinite; width: 320px;
         }
 
-        @keyframes float { 
-            0% { transform: translateY(0px); } 
-            50% { transform: translateY(-10px); } 
-            100% { transform: translateY(0px); } 
-        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
         .glass-panel h1 { 
-            color: #fff; font-size: 45px; margin: 0 0 5px 0; 
-            text-transform: uppercase; font-style: italic; letter-spacing: 2px;
+            color: #fff; font-size: 45px; margin: 0; text-transform: uppercase; font-style: italic; letter-spacing: 2px;
             text-shadow: 0 0 20px rgba(0, 255, 204, 0.8);
         }
         .glass-panel h1 span { color: #00ffcc; }
-        
-        .subtitle { 
-            color: #ff3366; font-size: 14px; margin-top: 0; margin-bottom: 35px; 
-            text-transform: uppercase; letter-spacing: 4px; font-weight: bold;
-            text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
-        }
+        .subtitle { color: #ff3366; font-size: 14px; margin: 0 0 35px 0; text-transform: uppercase; letter-spacing: 4px; font-weight: bold; text-shadow: 0 0 10px rgba(255, 51, 102, 0.6); }
 
-        .input-box { 
-            width: 85%; padding: 15px 20px; font-size: 16px; border-radius: 12px; 
-            border: 1px solid rgba(0, 255, 204, 0.3); background: rgba(0, 0, 0, 0.3); 
-            color: #00ffcc; text-align: center; outline: none; margin-bottom: 20px; 
-            transition: all 0.3s ease; font-weight: bold;
-        }
+        .input-box { width: 85%; padding: 15px; font-size: 16px; border-radius: 12px; border: 1px solid rgba(0, 255, 204, 0.3); background: rgba(0, 0, 0, 0.3); color: #00ffcc; text-align: center; outline: none; margin-bottom: 20px; transition: 0.3s; }
         .input-box:focus { border-color: #00ffcc; box-shadow: 0 0 15px rgba(0, 255, 204, 0.4); background: rgba(0, 0, 0, 0.6); }
-        .input-box::placeholder { color: rgba(255, 255, 255, 0.3); font-weight: normal; }
-
-        /* Naya Feature: Sound Settings */
-        .settings-row {
-            margin-bottom: 30px; color: #fff; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 10px;
-        }
-        .settings-row input[type="checkbox"] { accent-color: #00ffcc; width: 18px; height: 18px; cursor: pointer; }
 
         #playBtn { 
             width: 100%; padding: 16px; font-size: 18px; font-weight: 800; color: #0b0c10; 
@@ -73,11 +42,11 @@
         }
         #playBtn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 255, 204, 0.7); }
 
-        /* 📊 GAME UI (Scores, Radar, vsBoard) */
+        /* 📊 Game UI */
         #myScoreBoard { position: absolute; top: 15px; left: 20px; color: #fff; font-size: 20px; font-weight: bold; background: rgba(0, 0, 0, 0.6); padding: 8px 15px; border-radius: 12px; border: 1px solid rgba(0,255,204,0.3); z-index: 10; display: none; backdrop-filter: blur(5px); }
         #roomInfo { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 14px; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; z-index: 10; display: none; }
         
-        #vsBoard { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; background: rgba(11, 12, 16, 0.8); padding: 8px 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 10; display: none; white-space: nowrap; backdrop-filter: blur(5px); }
+        #vsBoard { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; background: rgba(11, 12, 16, 0.8); padding: 8px 25px; border-radius: 20px; z-index: 10; display: none; white-space: nowrap; backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.1); }
         .blue-team { color: #00ccff; text-shadow: 0 0 10px #00ccff; }
         .red-team { color: #ff3366; text-shadow: 0 0 10px #ff3366; }
         .vs-text { color: #fff; margin: 0 15px; font-size: 14px; opacity: 0.5; }
@@ -86,7 +55,7 @@
         #leaderboard h3 { margin: 0 0 8px 0; font-size: 13px; color: #ffcc00; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
         .leader-entry { font-size: 12px; margin: 6px 0; display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         
-        /* 🕹️ MOBILE CONTROLS */
+        /* 🕹️ Mobile Controls */
         #mobileControls { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; pointer-events: none; z-index: 20; }
         #joystickBase { position: absolute; bottom: 40px; left: 40px; width: 130px; height: 130px; background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 50%; pointer-events: auto; backdrop-filter: blur(5px); }
         #joystickStick { position: absolute; top: 35px; left: 35px; width: 60px; height: 60px; background: radial-gradient(circle, rgba(0, 255, 204, 0.9) 0%, rgba(0, 200, 150, 0.7) 100%); border-radius: 50%; box-shadow: 0 0 20px rgba(0, 255, 204, 0.5); pointer-events: none; transition: transform 0.05s linear; }
@@ -100,35 +69,22 @@
     <div id="startMenu">
         <div class="glass-panel">
             <h1>SNAKE <span>LITE</span></h1>
-            <p class="subtitle">E-Sports Edition</p>
-            
-            <input type="text" id="playerNameInput" class="input-box" placeholder="Your Name" maxlength="12">
-            <input type="text" id="roomCodeInput" class="input-box" placeholder="Squad Code (Optional)" maxlength="10">
-            
-            <div class="settings-row">
-                <label style="cursor: pointer;">
-                    <input type="checkbox" id="soundToggle" checked> 🔊 Game Sounds
-                </label>
-            </div>
-
+            <p class="subtitle">E-Sports Buffet</p>
+            <input type="text" id="playerNameInput" class="input-box" placeholder="Player Name" maxlength="12">
+            <input type="text" id="roomCodeInput" class="input-box" placeholder=" Squad Code (Optional)" maxlength="10">
             <button id="playBtn" onclick="startGame()">ENTER ARENA</button>
         </div>
     </div>
 
     <div id="myScoreBoard">Score: <span id="myScore">0</span></div>
     <div id="roomInfo">Server: <span id="currentRoomText"></span></div>
-    
     <div id="vsBoard">
-        <span class="blue-team"><span id="blueScore">0</span></span>
-        <span class="vs-text">VS</span>
-        <span class="red-team"><span id="redScore">0</span></span>
+        <span class="blue-team"><span id="blueScore">0</span></span> <span class="vs-text">VS</span> <span class="red-team"><span id="redScore">0</span></span>
     </div>
-
     <div id="leaderboard">
         <h3>🏆 Top Snakes</h3>
         <div id="lb-list"></div>
     </div>
-
     <div id="mobileControls">
         <div id="joystickBase"><div id="joystickStick"></div></div>
         <div id="boostBtnMobile">⚡</div>
@@ -144,28 +100,42 @@
         canvas.height = window.innerHeight;
 
         const ARENA_SIZE = 3000; 
-        let socket; 
-        let myId = null; 
-        let players = {}; 
-        let serverFoods = [];
+        let socket; let myId = null; 
+        let players = {}; let serverFoods = [];
         
         let inputDx = 0; let inputDy = 0;
         let gameActive = false; let isDead = false; 
         let isBoosting = false; let frameCount = 0;
-        let soundEnabled = true; // Naya variable
 
+        // dynamic FOOD TYPES (Sync with Server)
+        const FOOD_NORMAL = 0;
+        const FOOD_MAGNET = 1;
+        const FOOD_CHEM = 2;
+        const FOOD_COIN = 3;
+
+        // ==========================================
+        // 🎨 GRAPHICS ENGINE: Loading dynamic dynamic Assets
+        // ==========================================
         const imgSnakeHead = new Image(); imgSnakeHead.src = 'snake.png';
+        
+        // dynamic dynamic Buffet
         const imgApple = new Image(); imgApple.src = 'apple.png';
         const imgBurger = new Image(); imgBurger.src = 'burger.png';
-        const imgCake = new Image(); imgCake.src = 'cake.png';
-        const imgCandy = new Image(); imgCandy.src = 'candy.png';
-        const imgTruffle = new Image(); imgTruffle.src = 'truffle.png';
-        const foodImages = [imgApple, imgBurger, imgCake, imgCandy, imgTruffle];
+        const imgTomato = new Image(); imgTomato.src = 'tomato.png';
+        const imgOrange = new Image(); imgOrange.src = 'orange.png';
+        const imgSandwich = new Image(); imgSandwich.src = 'sandwich.png';
+        const imgCarrot = new Image(); imgCarrot.src = 'carrot.png';
+        // dynamic normal images array
+        const normalFoodImages = [imgApple, imgBurger, imgTomato, imgOrange, imgSandwich, imgCarrot];
 
-        // 🎵 SOUND ENGINE
+        // dynamic special Powerups
+        const imgCoin = new Image(); imgCoin.src = 'coin.png';
+        const imgChem = new Image(); imgChem.src = 'flask.png';
+        const imgMagnet = new Image(); imgMagnet.src = 'magnetism.png';
+
+        // 🎵 Sound Engine
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(freq, type, duration, vol=0.1) {
-            if(!soundEnabled) return; // Agar mute hai toh aawaz mat nikalo
             if(audioCtx.state === 'suspended') audioCtx.resume();
             let osc = audioCtx.createOscillator(); let gain = audioCtx.createGain();
             osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
@@ -176,38 +146,22 @@
         }
         function playEatSound() { playTone(600, 'sine', 0.1, 0.05); } 
         function playLootEatSound() { playTone(900, 'triangle', 0.15, 0.1); } 
+        function playPowerupSound() { playTone(1200, 'sine', 0.3, 0.1); } // Naya sound
         function playDeathSound() { playTone(100, 'sawtooth', 0.8, 0.2); } 
 
-        window.addEventListener("mousemove", (e) => { 
-            if (window.matchMedia("(pointer: fine)").matches) {
-                inputDx = e.clientX - (canvas.width / 2); inputDy = e.clientY - (canvas.height / 2);
-            }
-        });
+        // Controls
+        window.addEventListener("mousemove", (e) => { if (window.matchMedia("(pointer: fine)").matches) { inputDx = e.clientX - (canvas.width / 2); inputDy = e.clientY - (canvas.height / 2); } });
         window.addEventListener("mousedown", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = true; });
         window.addEventListener("mouseup", (e) => { if (window.matchMedia("(pointer: fine)").matches) isBoosting = false; });
-
+        
         const joystickBase = document.getElementById('joystickBase');
         const joystickStick = document.getElementById('joystickStick');
         const boostBtnMobile = document.getElementById('boostBtnMobile');
         let joyCenterX = 0; let joyCenterY = 0;
-        
-        joystickBase.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            let rect = joystickBase.getBoundingClientRect();
-            joyCenterX = rect.left + rect.width / 2; joyCenterY = rect.top + rect.height / 2;
-            moveJoystick(e.touches[0]);
-        }, {passive: false});
+        joystickBase.addEventListener('touchstart', (e) => { e.preventDefault(); let rect = joystickBase.getBoundingClientRect(); joyCenterX = rect.left + rect.width / 2; joyCenterY = rect.top + rect.height / 2; moveJoystick(e.touches[0]); }, {passive: false});
         joystickBase.addEventListener('touchmove', (e) => { e.preventDefault(); moveJoystick(e.touches[0]); }, {passive: false});
         joystickBase.addEventListener('touchend', (e) => { e.preventDefault(); joystickStick.style.transform = `translate(0px, 0px)`; }, {passive: false});
-
-        function moveJoystick(touch) {
-            let dx = touch.clientX - joyCenterX; let dy = touch.clientY - joyCenterY;
-            let distance = Math.hypot(dx, dy); let maxDist = 40; 
-            if(distance > maxDist) { dx = (dx / distance) * maxDist; dy = (dy / distance) * maxDist; }
-            joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
-            inputDx = dx; inputDy = dy;
-        }
-
+        function moveJoystick(touch) { let dx = touch.clientX - joyCenterX; let dy = touch.clientY - joyCenterY; let distance = Math.hypot(dx, dy); let maxDist = 40; if(distance > maxDist) { dx = (dx / distance) * maxDist; dy = (dy / distance) * maxDist; } joystickStick.style.transform = `translate(${dx}px, ${dy}px)`; inputDx = dx; inputDy = dy; }
         boostBtnMobile.addEventListener('touchstart', (e) => { e.preventDefault(); isBoosting = true; }, {passive: false});
         boostBtnMobile.addEventListener('touchend', (e) => { e.preventDefault(); isBoosting = false; }, {passive: false});
 
@@ -216,7 +170,6 @@
             let tBlue = 0; let tRed = 0;
             allPlayers.forEach(p => { if(p.team === 'Blue') tBlue += p.score; else tRed += p.score; });
             document.getElementById("blueScore").innerText = tBlue; document.getElementById("redScore").innerText = tRed;
-
             allPlayers.sort((a, b) => b.score - a.score);
             let lbHTML = "";
             for(let i=0; i<Math.min(5, allPlayers.length); i++) {
@@ -229,53 +182,22 @@
         }
 
         function drawRadar() {
-            const radarSize = 120; const margin = 20;
-            const rx = canvas.width - radarSize - margin; 
-            const ry = canvas.height - radarSize - margin;
-            const scale = radarSize / ARENA_SIZE;
-
-            ctx.fillStyle = "rgba(255, 255, 255, 0.05)"; 
-            ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 12); ctx.fill();
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)"; ctx.lineWidth = 1; ctx.stroke();
-
-            Object.values(players).forEach(p => {
-                ctx.fillStyle = p.color; ctx.beginPath();
-                let dotSize = (p.id === myId) ? 4 : 2; 
-                ctx.arc(rx + (p.x * scale), ry + (p.y * scale), dotSize, 0, Math.PI*2); ctx.fill();
-            });
-        }
-
-        function drawPremiumGrid() {
-            ctx.fillStyle = "rgba(255, 255, 255, 0.03)";
-            for(let i = 0; i < ARENA_SIZE; i += 60) {
-                for(let j = 0; j < ARENA_SIZE; j += 60) {
-                    ctx.beginPath(); ctx.arc(i, j, 2, 0, Math.PI*2); ctx.fill();
-                }
-            }
+            const radarSize = 130; const margin = 20; const rx = canvas.width - radarSize - margin; const ry = canvas.height - radarSize - margin; const scale = radarSize / ARENA_SIZE;
+            ctx.fillStyle = "rgba(11, 12, 16, 0.7)"; ctx.beginPath(); ctx.roundRect(rx, ry, radarSize, radarSize, 15); ctx.fill();
+            ctx.strokeStyle = "rgba(0, 255, 204, 0.3)"; ctx.lineWidth = 2; ctx.stroke();
+            Object.values(players).forEach(p => { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(rx + (p.x * scale), ry + (p.y * scale), (p.id === myId) ? 5 : 2.5, 0, Math.PI*2); ctx.fill(); });
         }
 
         function startGame() {
-            // Check Sound Settings
-            soundEnabled = document.getElementById("soundToggle").checked;
-            
-            if(soundEnabled && audioCtx.state === 'suspended') audioCtx.resume();
-            
+            if(audioCtx.state === 'suspended') audioCtx.resume();
             let nameInput = document.getElementById("playerNameInput").value.trim() || "Player";
             let roomInput = document.getElementById("roomCodeInput").value.trim(); 
-
             document.getElementById("startMenu").style.display = "none";
             document.getElementById("myScoreBoard").style.display = "block";
             document.getElementById("roomInfo").style.display = "block";
-            document.getElementById("vsBoard").style.display = "block"; 
-            canvas.style.display = "block";
-            
-            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-                document.getElementById("mobileControls").style.display = "block";
-                document.getElementById("leaderboard").style.display = "none"; 
-            } else { document.getElementById("leaderboard").style.display = "block"; }
-
+            document.getElementById("vsBoard").style.display = "block"; canvas.style.display = "block";
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) { document.getElementById("mobileControls").style.display = "block"; document.getElementById("leaderboard").style.display = "none"; } else { document.getElementById("leaderboard").style.display = "block"; }
             gameActive = true; isDead = false;
-
             socket = io();
             socket.on('connect', () => { myId = socket.id; socket.emit('joinRoom', { name: nameInput, roomCode: roomInput }); });
             socket.on('gameData', (data) => { players = data.players; serverFoods = data.foods; document.getElementById("currentRoomText").innerText = data.roomCode; updateUI(); });
@@ -283,117 +205,120 @@
             socket.on('updateLeaderboard', (serverPlayers) => { players = serverPlayers; updateUI(); });
             socket.on('foodUpdate', (foods) => { serverFoods = foods; });
             socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
-            
-            socket.on('respawn', (resetData) => { 
-                players[myId].x = resetData.x; players[myId].y = resetData.y; 
-                players[myId].score = resetData.score; players[myId].body = resetData.body; 
-                isDead = false; 
-            });
+            socket.on('respawn', (resetData) => { players[myId].x = resetData.x; players[myId].y = resetData.y; players[myId].score = resetData.score; players[myId].body = resetData.body; isDead = false; });
             socket.on('playerDisconnected', (id) => { delete players[id]; updateUI(); });
-
             gameLoop();
         }
 
         function gameLoop() {
-            if (!gameActive || !players[myId]) {
-                if(gameActive) requestAnimationFrame(gameLoop);
-                return;
-            }
-            
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            frameCount++; let myPlayer = players[myId];
-            
+            if (!gameActive || !players[myId]) { if(gameActive) requestAnimationFrame(gameLoop); return; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height); frameCount++; let myPlayer = players[myId];
             let camX = canvas.width / 2 - myPlayer.x; let camY = canvas.height / 2 - myPlayer.y;
-
             ctx.save(); ctx.translate(camX, camY); 
-
+            // Draw Arena
             ctx.fillStyle = "#0b0c10"; ctx.fillRect(0, 0, ARENA_SIZE, ARENA_SIZE);
-            drawPremiumGrid();
-            
-            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 10; 
-            ctx.shadowBlur = 15; ctx.shadowColor = myPlayer.color;
-            ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE); ctx.shadowBlur = 0;
+            ctx.fillStyle = "rgba(255, 255, 255, 0.03)"; for(let i = 0; i < ARENA_SIZE; i += 60) { for(let j = 0; j < ARENA_SIZE; j += 60) { ctx.beginPath(); ctx.arc(i, j, 2, 0, Math.PI*2); ctx.fill(); } }
+            ctx.strokeStyle = myPlayer.color; ctx.lineWidth = 15; ctx.shadowBlur = 20; ctx.shadowColor = myPlayer.color; ctx.strokeRect(0, 0, ARENA_SIZE, ARENA_SIZE); ctx.shadowBlur = 0;
 
             if (!isDead) {
                 let angle = Math.atan2(inputDy, inputDx);
-                let speed = (isBoosting && myPlayer.score > 15) ? 11 : 5.5; 
-                let speedX = 0, speedY = 0;
-                
-                if (Math.hypot(inputDx, inputDy) > 5) { speedX = Math.cos(angle) * speed; speedY = Math.sin(angle) * speed; }
+                // ⚡ dynamic SPEED Factor (Server se Factor use karein)
+                let baseSpeed = 5.5;
+                if(isBoosting && myPlayer.score > 15) baseSpeed = 11;
+                let finalSpeed = baseSpeed * (myPlayer.speedFactor || 1); 
 
+                let speedX = 0, speedY = 0;
+                if (Math.hypot(inputDx, inputDy) > 5) { speedX = Math.cos(angle) * finalSpeed; speedY = Math.sin(angle) * finalSpeed; }
                 myPlayer.x += speedX; myPlayer.y += speedY;
                 if(myPlayer.x < 0) myPlayer.x = 0; if(myPlayer.x > ARENA_SIZE) myPlayer.x = ARENA_SIZE;
                 if(myPlayer.y < 0) myPlayer.y = 0; if(myPlayer.y > ARENA_SIZE) myPlayer.y = ARENA_SIZE;
-
-                if(!myPlayer.body) myPlayer.body = [];
-                myPlayer.body.unshift({x: myPlayer.x, y: myPlayer.y});
+                if(!myPlayer.body) myPlayer.body = []; myPlayer.body.unshift({x: myPlayer.x, y: myPlayer.y});
+                let targetLength = 15 + Math.floor(myPlayer.score / 10); while(myPlayer.body.length > targetLength) myPlayer.body.pop();
+                if(frameCount % 4 === 0 && (speedX !== 0 || speedY !== 0)) { socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body }); }
+                if(isBoosting && myPlayer.score > 15 && frameCount % 6 === 0) { let tailPos = myPlayer.body[myPlayer.body.length - 1] || {x: myPlayer.x, y: myPlayer.y}; socket.emit('dropMass', tailPos); }
+                Object.values(players).forEach(enemy => { if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { enemy.body.forEach(seg => { if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) { isDead = true; playDeathSound(); socket.emit('playerDied'); } }); } });
                 
-                let targetLength = 15 + Math.floor(myPlayer.score / 10);
-                while(myPlayer.body.length > targetLength) myPlayer.body.pop();
-
-                if(frameCount % 4 === 0 && (speedX !== 0 || speedY !== 0)) {
-                    socket.emit('playerMovement', { x: myPlayer.x, y: myPlayer.y, body: myPlayer.body });
-                }
-
-                if(isBoosting && myPlayer.score > 15 && frameCount % 6 === 0) {
-                    let tailPos = myPlayer.body[myPlayer.body.length - 1] || {x: myPlayer.x, y: myPlayer.y};
-                    socket.emit('dropMass', tailPos);
-                }
-
-                Object.values(players).forEach(enemy => {
-                    if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { 
-                        enemy.body.forEach(seg => {
-                            if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) {
-                                isDead = true; playDeathSound(); socket.emit('playerDied');
-                            }
-                        });
-                    }
-                });
-
+                // 🍎 optimized Eat Logic (No Optimistic Score update for complex powerups, wait for server sync)
                 if(!isDead) {
                     for(let i = 0; i < serverFoods.length; i++) {
                         let f = serverFoods[i];
                         if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
-                            myPlayer.score += (f.value || 10);
-                            document.getElementById("myScore").innerText = myPlayer.score;
-                            if(f.value > 10) playLootEatSound(); else playEatSound();
-                            socket.emit('eatFood', f.id); serverFoods.splice(i, 1); 
+                            
+                            // Play correct sound based on type locally
+                            if(f.type === FOOD_MAGNET || f.type === FOOD_CHEM || f.type === FOOD_COIN){
+                                playPowerupSound(); 
+                                // Locally set timers to apply GLOW instantly for feel
+                                if(f.type === FOOD_MAGNET) myPlayer.magnetTimer = Date.now() + 10000;
+                                if(f.type === FOOD_CHEM) myPlayer.chemTimer = Date.now() + 10000;
+                            } else {
+                                if(f.value > 10) playLootEatSound(); else playEatSound();
+                            }
+                            
+                            socket.emit('eatFood', f.id); 
+                            serverFoods.splice(i, 1); 
                             break;
                         }
                     }
                 }
             }
 
+            // 🍔 DRAW FOOD IMAGES (Buffet Update)
             serverFoods.forEach(f => {
-                ctx.shadowBlur = 5; ctx.shadowColor = f.color;
-                let charCode = f.id.charCodeAt(0) || 0;
-                let imgToDraw = foodImages[charCode % foodImages.length]; 
-                let displaySize = f.size * 2.5; 
+                let imgToDraw = null;
+                ctx.shadowBlur = 10; ctx.shadowColor = f.color;
                 
-                if (imgToDraw.complete && imgToDraw.naturalHeight !== 0) {
+                // Switch on f.type (server sends this now)
+                switch(f.type){
+                    case FOOD_MAGNET: imgToDraw = imgMagnet; break;
+                    case FOOD_CHEM: imgToDraw = imgChem; break;
+                    case FOOD_COIN: imgToDraw = imgCoin; ctx.shadowColor = '#ffcc00'; break; // Gold glow
+                    default: 
+                        // Pick random normal food based on ID
+                        let charCode = f.id.charCodeAt(f.id.length - 1) || 0;
+                        imgToDraw = normalFoodImages[charCode % normalFoodImages.length]; 
+                }
+
+                // 🔥 size optimization: SIZE BOOT (Bigger Food as requested)
+                let displaySize = f.size * 4; // Purane 2.5x se bada (4x)
+                
+                if (imgToDraw && imgToDraw.complete && imgToDraw.naturalHeight !== 0) {
                     ctx.drawImage(imgToDraw, f.x - displaySize/2, f.y - displaySize/2, displaySize, displaySize);
                 } else {
                     ctx.fillStyle = f.color; ctx.beginPath(); ctx.arc(f.x, f.y, f.size, 0, Math.PI * 2); ctx.fill();
                 }
             });
 
+            // 🐍 DRAW PREMIUM SNAKES
             Object.values(players).forEach(p => {
                 ctx.shadowBlur = 10; ctx.shadowColor = p.color;
                 
+                // ⚡ Powerup GLOW Effect
+                if(p.magnetTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = '#00ff00'; } // Green for Magnet
+                if(p.chemTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = `hsl(${frameCount % 360}, 100%, 70%)`; } // Rainbow for Chem
+
+                // Body
                 if(p.body && p.body.length > 0) {
                     for(let i = p.body.length - 1; i >= 0; i--) {
                         let seg = p.body[i];
-                        ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color;
+                        
+                        // Chemical Rainbow Trail
+                        if(p.chemTimer > Date.now()){
+                            ctx.fillStyle = `hsl(${(frameCount + i*10) % 360}, 100%, 70%)`;
+                        } else {
+                            ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color;
+                        }
+                        
                         ctx.beginPath();
                         let s = p.size - (i * (p.size / p.body.length) * 0.4); 
                         ctx.arc(seg.x, seg.y, s / 2, 0, Math.PI * 2); ctx.fill();
                     }
                 }
                 
+                // Head
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 let headAngle = 0;
-                if (p.body && p.body.length > 0) { headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x); } 
+                if (p.body && p.body.length > 0) { headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x);Head; } 
                 else if (p.id === myId) { headAngle = Math.atan2(inputDy, inputDx); }
                 
                 ctx.rotate(headAngle + Math.PI/2); 
@@ -406,6 +331,7 @@
                 }
                 ctx.restore();
 
+                // Name Tag
                 ctx.fillStyle = "white"; ctx.font = "bold 13px Arial"; ctx.textAlign = "center"; ctx.shadowBlur = 0;
                 ctx.fillText(p.name, p.x, p.y - 30);
             });
