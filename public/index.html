@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Snake Lite - Premium Edition</title>
+    <link rel="manifest" href="/manifest.json">
     <style>
         /* 🌌 Premium Background */
         body { margin: 0; padding: 0; background-color: #0b0c10; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; touch-action: none; }
@@ -238,22 +239,18 @@
                 if(isBoosting && myPlayer.score > 15 && frameCount % 6 === 0) { let tailPos = myPlayer.body[myPlayer.body.length - 1] || {x: myPlayer.x, y: myPlayer.y}; socket.emit('dropMass', tailPos); }
                 Object.values(players).forEach(enemy => { if (enemy.id !== myId && enemy.body && enemy.team !== myPlayer.team) { enemy.body.forEach(seg => { if (Math.hypot(myPlayer.x - seg.x, myPlayer.y - seg.y) < enemy.size / 1.5) { isDead = true; playDeathSound(); socket.emit('playerDied'); } }); } });
                 
-                // 🍎 optimized Eat Logic (No Optimistic Score update for complex powerups, wait for server sync)
+                // 🍎 optimized Eat Logic
                 if(!isDead) {
                     for(let i = 0; i < serverFoods.length; i++) {
                         let f = serverFoods[i];
                         if(Math.hypot(myPlayer.x - f.x, myPlayer.y - f.y) < myPlayer.size) {
-                            
-                            // Play correct sound based on type locally
                             if(f.type === FOOD_MAGNET || f.type === FOOD_CHEM || f.type === FOOD_COIN){
                                 playPowerupSound(); 
-                                // Locally set timers to apply GLOW instantly for feel
                                 if(f.type === FOOD_MAGNET) myPlayer.magnetTimer = Date.now() + 10000;
                                 if(f.type === FOOD_CHEM) myPlayer.chemTimer = Date.now() + 10000;
                             } else {
                                 if(f.value > 10) playLootEatSound(); else playEatSound();
                             }
-                            
                             socket.emit('eatFood', f.id); 
                             serverFoods.splice(i, 1); 
                             break;
@@ -267,19 +264,16 @@
                 let imgToDraw = null;
                 ctx.shadowBlur = 10; ctx.shadowColor = f.color;
                 
-                // Switch on f.type (server sends this now)
                 switch(f.type){
                     case FOOD_MAGNET: imgToDraw = imgMagnet; break;
                     case FOOD_CHEM: imgToDraw = imgChem; break;
-                    case FOOD_COIN: imgToDraw = imgCoin; ctx.shadowColor = '#ffcc00'; break; // Gold glow
+                    case FOOD_COIN: imgToDraw = imgCoin; ctx.shadowColor = '#ffcc00'; break; 
                     default: 
-                        // Pick random normal food based on ID
                         let charCode = f.id.charCodeAt(f.id.length - 1) || 0;
                         imgToDraw = normalFoodImages[charCode % normalFoodImages.length]; 
                 }
 
-                // 🔥 size optimization: SIZE BOOT (Bigger Food as requested)
-                let displaySize = f.size * 4; // Purane 2.5x se bada (4x)
+                let displaySize = f.size * 4; 
                 
                 if (imgToDraw && imgToDraw.complete && imgToDraw.naturalHeight !== 0) {
                     ctx.drawImage(imgToDraw, f.x - displaySize/2, f.y - displaySize/2, displaySize, displaySize);
@@ -293,33 +287,33 @@
                 ctx.shadowBlur = 10; ctx.shadowColor = p.color;
                 
                 // ⚡ Powerup GLOW Effect
-                if(p.magnetTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = '#00ff00'; } // Green for Magnet
-                if(p.chemTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = `hsl(${frameCount % 360}, 100%, 70%)`; } // Rainbow for Chem
+                if(p.magnetTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = '#00ff00'; } 
+                if(p.chemTimer > Date.now()){ ctx.shadowBlur = 30; ctx.shadowColor = `hsl(${frameCount % 360}, 100%, 70%)`; }
 
                 // Body
                 if(p.body && p.body.length > 0) {
                     for(let i = p.body.length - 1; i >= 0; i--) {
                         let seg = p.body[i];
-                        
-                        // Chemical Rainbow Trail
                         if(p.chemTimer > Date.now()){
                             ctx.fillStyle = `hsl(${(frameCount + i*10) % 360}, 100%, 70%)`;
                         } else {
                             ctx.fillStyle = (i % 3 === 0) ? "#ffffff" : p.color;
                         }
-                        
                         ctx.beginPath();
                         let s = p.size - (i * (p.size / p.body.length) * 0.4); 
                         ctx.arc(seg.x, seg.y, s / 2, 0, Math.PI * 2); ctx.fill();
                     }
                 }
                 
-                // Head
+                // Head (GALTI YAHAN THI, AB THEEK HAI ✅)
                 ctx.save();
                 ctx.translate(p.x, p.y);
                 let headAngle = 0;
-                if (p.body && p.body.length > 0) { headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x);Head; } 
-                else if (p.id === myId) { headAngle = Math.atan2(inputDy, inputDx); }
+                if (p.body && p.body.length > 0) { 
+                    headAngle = Math.atan2(p.y - p.body[0].y, p.x - p.body[0].x); 
+                } else if (p.id === myId) { 
+                    headAngle = Math.atan2(inputDy, inputDx); 
+                }
                 
                 ctx.rotate(headAngle + Math.PI/2); 
                 let hSize = p.size * 1.8; 
