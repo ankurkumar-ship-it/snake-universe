@@ -6,15 +6,15 @@
   "orientation": "landscape",
   "scope": "/",
   "short_name": "Snake Lite",
-  "start_url": "/",
+  "start_url": "https://snake-universe-squads.onrender.com",
   "theme_color": "#0b0c10",
   "description": "An epic 5v5 tactical multiplayer snake battle arena.",
   "lang": "en",
   "display_override": [
-    "window-controls-overlay",
-    "fullscreen"
+    "window-controls-overlay"
   ],
   "categories": [
     "games"
-  ]
+  ],
+  "iarc_rating_id": "https://snake-universe-squads.onrender.com"
 }
