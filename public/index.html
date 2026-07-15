@@ -203,7 +203,24 @@
             socket.on('connect', () => { myId = socket.id; socket.emit('joinRoom', { name: nameInput, roomCode: roomInput }); });
             socket.on('gameData', (data) => { players = data.players; serverFoods = data.foods; document.getElementById("currentRoomText").innerText = data.roomCode; updateUI(); });
             socket.on('newPlayer', (pInfo) => { players[pInfo.id] = pInfo; updateUI(); });
-            socket.on('updateLeaderboard', (serverPlayers) => { players = serverPlayers; updateUI(); });
+            socket.on('updateLeaderboard', (serverPlayers) => { 
+    // Apni local smooth position ko pehle save kar lo
+    if(players[myId]) {
+        let tempX = players[myId].x;
+        let tempY = players[myId].y;
+        let tempBody = players[myId].body;
+
+        players = serverPlayers; // Server ka naya data le lo
+
+        // Apni purani smooth position wapas daal do (Server ko apni position chhedne mat do)
+        players[myId].x = tempX;
+        players[myId].y = tempY;
+        players[myId].body = tempBody;
+    } else {
+        players = serverPlayers;
+    }
+    updateUI(); 
+});
             socket.on('foodUpdate', (foods) => { serverFoods = foods; });
             socket.on('playerMoved', (p) => { if(players[p.id]) { players[p.id].x = p.x; players[p.id].y = p.y; players[p.id].body = p.body; } });
             socket.on('respawn', (resetData) => { players[myId].x = resetData.x; players[myId].y = resetData.y; players[myId].score = resetData.score; players[myId].body = resetData.body; isDead = false; });
